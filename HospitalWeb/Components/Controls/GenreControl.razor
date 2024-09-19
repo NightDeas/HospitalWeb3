@@ -1,0 +1,70 @@
+﻿@page "/genreControl"
+@using DataBase.Entities;
+@using Radzen.Blazor;
+@inject DataBase.Operations.IDefaultOperationDbEntity<Genre> genreServ;
+<RadzenDropDown @bind-Value="Value" TValue="int" @onchange="OnChange"
+                Data="@genres"
+                ValueProperty="Id"
+                TextProperty="Name"></RadzenDropDown>
+@code {
+
+
+
+
+
+
+
+    List<DataBase.Entities.Genre> genres = new();
+
+    protected async override Task OnInitializedAsync()
+
+    {
+
+        genres = await genreServ.GetAll();
+
+    }
+
+    int value = 0;
+
+
+
+    void OnChange(ChangeEventArgs e)
+    {
+        if (e.Value == null)
+            return;
+        Value = (int)e.Value;
+
+        ValueChanged.InvokeAsync(Value);
+
+    }
+
+
+
+
+
+    [Parameter]
+
+    public EventCallback<int> ValueChanged
+    {
+        get;
+
+        set;
+    }
+
+    [Parameter]
+
+    public int Value
+    {
+        get => value;
+
+        set
+        {
+            if (value != this.value)
+            {
+                this.value = value;
+                ValueChanged.InvokeAsync(this.value);
+            }
+
+        }
+    }
+}
