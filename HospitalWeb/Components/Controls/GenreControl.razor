@@ -2,22 +2,14 @@
 @using DataBase.Entities;
 @using Radzen.Blazor;
 @inject DataBase.Operations.IDefaultOperationDbEntity<Genre> genreServ;
-<RadzenDropDown @bind-Value="Value" TValue="int" @onchange="OnChange"
+<RadzenDropDown @bind-Value="Value"
+                TValue="int" @onchange="OnChange"
                 Data="@genres"
                 ValueProperty="Id"
                 TextProperty="Name"></RadzenDropDown>
 @code {
-
-
-
-
-
-
-
     List<DataBase.Entities.Genre> genres = new();
-
     protected async override Task OnInitializedAsync()
-
     {
 
         genres = await genreServ.GetAll();

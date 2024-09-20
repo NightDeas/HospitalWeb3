@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using Radzen;
 using MudBlazor;
+using HospitalWeb.Components.Services;
 
 
 namespace HospitalWeb
@@ -20,20 +21,23 @@ namespace HospitalWeb
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
             builder.Services.AddRazorPages();
-			builder.Services.AddServerSideBlazor();
-			builder.Services.AddMudServices();
-			builder.Services.AddRadzenComponents();
+            builder.Services.AddServerSideBlazor();
+            builder.Services.AddMudServices();
+            builder.Services.AddRadzenComponents();
             builder.Services.AddScoped<IDialogService, MudBlazor.DialogService>();
             builder.Services.AddDbContext<Context>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("spek"));
             });
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<CookiesService>();
+            builder.Services.AddScoped<PatientOperationService>();
             builder.Services.AddScoped<DataBase.Operations.IDefaultOperationDbEntity<Patient>, PatientOperationService>();
-			builder.Services.AddScoped<DataBase.Operations.IDefaultOperationDbEntity<MedCard>, MedCardOperationService>();
-			builder.Services.AddScoped<DataBase.Operations.IDefaultOperationDbEntity<Genre>, GenreOperationService>();
-			builder.Services.AddScoped<DataBase.Operations.IDefaultOperationDbEntity<InsurancePolicy>, InsuranceOperationService>();
-			builder.Services.AddSingleton<HospitalWeb.Components.Services.Notification.NotificationService>();
-			var app = builder.Build();
+            builder.Services.AddScoped<DataBase.Operations.IDefaultOperationDbEntity<MedCard>, MedCardOperationService>();
+            builder.Services.AddScoped<DataBase.Operations.IDefaultOperationDbEntity<Genre>, GenreOperationService>();
+            builder.Services.AddScoped<DataBase.Operations.IDefaultOperationDbEntity<InsurancePolicy>, InsuranceOperationService>();
+            //builder.Services.AddSingleton<HospitalWeb.Components.Services.Notification.NotificationService>();
+            var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

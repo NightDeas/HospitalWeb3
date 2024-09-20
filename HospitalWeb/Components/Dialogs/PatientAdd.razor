@@ -4,6 +4,7 @@
 @inject IDefaultOperationDbEntity<Patient> patientServ;
 @inject IDefaultOperationDbEntity<MedCard> medCardServ;
 @inject IDefaultOperationDbEntity<InsurancePolicy> InsurancePolicyServ;
+@inject ISnackbar SbService;
 @using HospitalWeb.Components.Controls;
 @using Radzen.Blazor;
 @using System.ComponentModel.DataAnnotations
@@ -51,28 +52,41 @@
 	</DialogContent>
 	<DialogActions>
 		<MudButton Color="Color.Primary" OnClick="CreatePatient">Добавить</MudButton>
-		<MudButton Color="Color.Error">Отмена</MudButton>
+		<MudButton Color="Color.Error" OnClick="Cancel">Отмена</MudButton>
 	</DialogActions>
 </MudDialog>
 
 @code {
 
+
+
+
+
+
+
 	const string ERROR_REQUIRED = "Обязатльное поле для заполнения";
 	private bool valid;
 	private bool hiddenGlobalErrorText = true;
 	[CascadingParameter]
-	private MudDialogInstance MudDialog { get; set; }
+	private MudDialogInstance MudDialogInstance { get; set; }
+
+	private MudDialog MudDialog;
 	private MudForm MudForm;
 
-	private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+	private void Submit() => MudDialogInstance.Close(DialogResult.Ok(true));
 
-	private void Cancel() => MudDialog.Cancel();
+	private void Cancel() => MudDialogInstance.Cancel();
+
 	DataBase.Entities.Patient patient = new();
 	DataBase.Entities.InsurancePolicy insurancePolicy = new();
 	DataBase.Entities.MedCard medCard = new();
 
 
 	void LastNameMTTextChanged(string value) => patient.LastName = value;
+
+
+
+	async void CloseDialog() => await MudDialog.CloseAsync();
 
 	async void CreatePatient()
 	{
@@ -93,6 +107,9 @@
 		tempId = await InsurancePolicyServ.AddAsync(insurancePolicy);
 		if (tempId == 0)
 			throw new();
+			SbService.Add("Пациент добавлен в базу", Severity.Success);
+			await MudDialog.CloseAsync();
+			
 
 	}
 }

@@ -20,6 +20,7 @@ namespace DataBase
 				return;
 			}
 			optionsBuilder.UseSqlServer(DataBaseService.GetConnectionString());
+			optionsBuilder.EnableSensitiveDataLogging(false);
 			base.OnConfiguring(optionsBuilder);
 		}
 

@@ -1,7 +1,7 @@
 ﻿using DataBase.Entities;
-
+using DataBase.Models;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,14 +36,16 @@ namespace DataBase.Operations
 			throw new NotImplementedException();
 		}
 
-        public Task<Patient> Get(int id)
+        public async Task<Patient> Get(int id)
         {
-            throw new NotImplementedException();
+			throw new NotImplementedException();
         }
 
         public async Task<List<Patient>> GetAll()
         {
-			return await Context.Patients.ToListAsync();
+			return await Context.Patients
+				.Include(x=> x.Genre)
+				.ToListAsync();
         }
 
         public Task<List<Patient>> GetPatientsAsync()
@@ -54,6 +56,24 @@ namespace DataBase.Operations
 		public Task UpdateAsync(Patient Entity)
 		{
 			throw new NotImplementedException();
+		}
+		/// <summary>
+		/// Получить всю доступную информацию о пациенте, которая включает:
+		/// основная информация(Patient), мед карта(medCard), полис(insurancePolicy)
+		/// </summary>
+		/// <returns></returns>
+		public async Task<List<PatientFullData>> GetFullData()
+		{
+			IPatientDataOperation<MedCard> medCardService = new Operations.MedCardOperationService(Context);
+			IPatientDataOperation<InsurancePolicy> insuranceOperationService = new Operations.InsuranceOperationService(Context);
+			List<PatientFullData> patientFullData = new List<PatientFullData>();
+			var patients = await GetAll();
+			foreach (var patient in patients)
+			{
+				var medcard = (patient.Id);
+                patientFullData.Add(new(patient, await insuranceOperationService.GetByPatient(patient.Id), await medCardService.GetByPatient(patient.Id)));
+			}
+			return patientFullData;
 		}
 	}
 }

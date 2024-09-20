@@ -2,10 +2,12 @@
 @inject IDialogService DialogServices
 @* @inject MudBlazor.DialogService DialogService;*@
 @inject ISnackbar SnackBarService;
-@inject DataBase.Operations.PatientOperationService patientServ;
-@inject Components.Services.Notification.NotificationService NotificationService;
+@inject IDefaultOperationDbEntity<Patient> patientServ;
+@inject PatientOperationService patientFullDataService;
+@inject Services.CookiesService cookieService;
 @using System.Net.Http.Json
 @using DataBase.Entities
+@using DataBase.Operations
 <MudGrid Spacing="6">
     <MudItem xs="3">
         <MudStack>
@@ -15,7 +17,7 @@
                     <MudTreeView CheckBoxColor="Color.Info" Text="Отображение полей">
                         <MudTreeViewItem>
                             <Content>
-                                <MudCheckBox @bind-Value="dateOfBirthColumnVisible" Label="Дата рождения"></MudCheckBox>
+                                <MudCheckBox @bind-Value="DateOfBirthColumnVisible" Label="Дата рождения"></MudCheckBox>
                             </Content>
                         </MudTreeViewItem>
                         <MudTreeViewItem>
@@ -45,7 +47,22 @@
                         </MudTreeViewItem>
                         <MudTreeViewItem>
                             <Content>
-                                <MudCheckBox @bind-Value="mailColumnVisible" Label="Почтsа"></MudCheckBox>
+                                <MudCheckBox @bind-Value="mailColumnVisible" Label="Почта"></MudCheckBox>
+                            </Content>
+                        </MudTreeViewItem>
+                        <MudTreeViewItem>
+                            <Content>
+                                <MudCheckBox @bind-Value="insuranceNumberVisible" Label="Номер полиса"></MudCheckBox>
+                            </Content>
+                        </MudTreeViewItem>
+                        <MudTreeViewItem>
+                            <Content>
+                                <MudCheckBox @bind-Value="insuranceEndVisible" Label="Срок окончания полиса"></MudCheckBox>
+                            </Content>
+                        </MudTreeViewItem>
+                        <MudTreeViewItem>
+                            <Content>
+                                <MudCheckBox @bind-Value="medCardCreateVisible" Label="Дата получения полиса"></MudCheckBox>
                             </Content>
                         </MudTreeViewItem>
                     </MudTreeView>
@@ -57,14 +74,17 @@
         <MudPaper class="pa-5 ma-2" style="height: 80vh" Outlined="true">
             <MudDataGrid Items="@patients">
                 <Columns>
-                    <PropertyColumn Property="x => x.FullName" Title="ФИО" />
-                    <PropertyColumn Property="x => x.DateOfBirth" Hidden="@(!dateOfBirthColumnVisible)" Title="Дата рождения" />
-                    <PropertyColumn Property="x => x.Address" Hidden="@(!adressColumnVisible)" Title="Адрес" />
-                    <PropertyColumn Property="x => x.WorkAddress" Hidden="@(!workAdressColumnVisible)" Title="Рабочий адрес" />
-                    <PropertyColumn Property="x => x.Telephone" Hidden="@(!telephoneColumnVisible)" Title="Телефон" />
-                    <PropertyColumn Property="x => x.Email" Hidden="@(!mailColumnVisible)" Title="Почта" />
-                    <PropertyColumn Property="x => x.Genre.Name" Hidden="@(!genreColumnVisible)" Title="Пол" />
-                    <PropertyColumn Property="x => x.Passport" Hidden="@(!passportColumnVisible)" Title="Паспорт" />
+                    <PropertyColumn Property="x => x.Patient.FullName" Title="ФИО" />
+                    <PropertyColumn Property="x => x.Patient.DateOfBirth" Format="dd-.MM-yyyy" Hidden="@(!dateOfBirthColumnVisible)" Title="Дата рождения" />
+                    <PropertyColumn Property="x => x.Patient.Address" Hidden="@(!adressColumnVisible)" Title="Адрес" />
+                    <PropertyColumn Property="x => x.Patient.WorkAddress" Hidden="@(!workAdressColumnVisible)" Title="Рабочий адрес" />
+                    <PropertyColumn Property="x => x.Patient.Telephone" Hidden="@(!telephoneColumnVisible)" Title="Телефон" />
+                    <PropertyColumn Property="x => x.Patient.Email" Hidden="@(!mailColumnVisible)" Title="Почта" />
+                    <PropertyColumn Property="x => x.Patient.Genre.Name" Hidden="@(!genreColumnVisible)" Title="Пол" />
+                    <PropertyColumn Property="x => x.Patient.Passport" Hidden="@(!passportColumnVisible)" Title="Паспорт" />
+                    <PropertyColumn Property="x => x.InsurancePolicy.Number" Hidden="@(!insuranceNumberVisible)" Title="Номер полиса" />
+                    <PropertyColumn Property="x => x.InsurancePolicy.End" Format="dd.MM.yyyy" Hidden="@(!insuranceEndVisible)" Title="Срок окончания полиса" />
+                    <PropertyColumn Property="x => x.MedCard.Created" Format="dd.MM.yyyy" HiddFormat="dd.MM.yyyy" en="@(!medCardCreateVisible)" Title="Дата создания мед карты" />
                 </Columns>
             </MudDataGrid>
         </MudPaper>
@@ -77,62 +97,68 @@
 </MudGrid>
 
 @code {
-
-
-
-
-
-
-
     bool dateOfBirthColumnVisible = true;
+    bool DateOfBirthColumnVisible
+    {
+        get => dateOfBirthColumnVisible; set
+
+        {
+            dateOfBirthColumnVisible = value;
+            cookieService.SetCookie(Services.CookiesService.Keys.dateOfBirthColumnVisible, dateOfBirthColumnVisible.ToString(), 31);
+        }
+    }
     bool telephoneColumnVisible = true;
     bool mailColumnVisible = false;
     bool passportColumnVisible = false;
     bool adressColumnVisible = true;
     bool workAdressColumnVisible = false;
     bool genreColumnVisible = false;
+    bool insuranceNumberVisible = false;
+    bool insuranceEndVisible = false;
+    bool medCardCreateVisible = false;
+
+
+
+    bool isTest = true;
 
 
     public int _spcaing = 6;
-    public List<DataBase.Entities.Patient> patients = new()
-    {
-        new()
-        {
-            FirstName = "1",
-            DateOfBirth = DateTime.Now,
-            Address = "123213"
-        },
-        new()
-        {
-            FirstName = "2",
-            DateOfBirth = DateTime.Now,
-            Address = "123213"
-        }
-    };
+    public List<DataBase.Models.PatientFullData> patients = new();
 
-    Task AutoUpdateTable;
+    async Task LoadCookieVisibleColumn()
+    {
+        var data = cookieService.GetCookie(Services.CookiesService.Keys.dateOfBirthColumnVisible, Services.CookiesService.Types.@bool);
+        if (data != null)
+            DateOfBirthColumnVisible = (bool)data;
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        patients = await patientServ.GetAll();
-        AutoUpdateTable = new(async () =>
-        {
-            while (true)
-            {
-                await Task.Delay(10000); // 10 second
-                var patients = await GetPatients();
-                await InvokeAsync(() => SetPatients(patients));
-            }
-        });
-        AutoUpdateTable.Start();
+        await AutoUpdateTable();
+        await LoadCookieVisibleColumn();
+    }
+
+    private async Task AutoUpdateTable()
+    {
+        await Task.Run(async () =>
+         {
+             while (true)
+             {
+                 var patients = await GetPatients();
+                 await InvokeAsync(() => SetPatients(patients));
+                 if (isTest) SnackBarService.Add("TEST:Таблица обновлена");
+                 await Task.Delay(3000); // 10 second
+             }
+         });
     }
 
 
-    async Task<List<Patient>> GetPatients() => await patientServ.GetAll();
+    async Task<List<DataBase.Models.PatientFullData>> GetPatients() => await patientFullDataService.GetFullData();
 
 
 
-    void SetPatients(List<DataBase.Entities.Patient> patients)
+
+    void SetPatients(List<DataBase.Models.PatientFullData> patients)
     {
         this.patients = patients;
         StateHasChanged();
