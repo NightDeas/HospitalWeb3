@@ -10,6 +10,6 @@ namespace DataBase.Entities
     {
         public string Name { get;set; }
 
-        public virtual Patient Patient { get; set; }
+        public virtual ICollection<Patient> Patient { get; set; }
     }
 }

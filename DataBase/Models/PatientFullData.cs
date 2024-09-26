@@ -16,5 +16,22 @@ namespace DataBase.Models
             InsurancePolicy = insurancePolicy;
             MedCard = medCard;
         }
+
+        public PatientFullData(Patient patient)
+        {
+            Patient = patient;
+            InsurancePolicy = patient.InsurancePolicy;
+            MedCard = patient.MedCard;
+        }
+
+        public static List<PatientFullData> ToFullData(List<Patient> patients)
+        {
+            List<PatientFullData> patientFullDatas = new();
+            foreach (var patient in patients)
+            {
+                patientFullDatas.Add(new PatientFullData(patient));
+            }
+            return patientFullDatas;
+        }
     }
 }

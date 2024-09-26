@@ -1,6 +1,7 @@
 ﻿using DataBase.Entities;
 using DataBase.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
@@ -48,6 +49,7 @@ namespace DataBase.Operations
 				.ToListAsync();
         }
 
+     
         public Task<List<Patient>> GetPatientsAsync()
 		{
 			throw new NotImplementedException();
@@ -75,5 +77,32 @@ namespace DataBase.Operations
 			}
 			return patientFullData;
 		}
-	}
+
+        public async Task<List<PatientFullData>> GetFullData(string parametr)
+        {
+			bool parseDate = DateTime.TryParse(parametr, out DateTime dateTime);
+			var test = await Context.Patients.Include(x => x.MedCard).ToListAsync();
+            var fullDataPatient = await Context.Patients
+    .Include(x => x.Genre)
+    .Include(x => x.MedCard)
+    .Include(x => x.InsurancePolicy)
+    .Where(x =>
+        x.LastName.Contains(parametr) ||
+        x.FirstName.Contains(parametr) ||
+        x.Patronymic.Contains(parametr) ||
+        (parseDate && x.MedCard != null && x.MedCard.Created.Date == dateTime) ||
+        (parseDate && x.MedCard != null && x.MedCard.Updated.Date == dateTime) ||
+        x.Passport.Contains(parametr) ||
+        (x.InsurancePolicy != null && x.InsurancePolicy.Number.Contains(parametr)) ||
+        (parseDate && x.InsurancePolicy != null && x.InsurancePolicy.End == dateTime) ||
+        x.WorkAddress.Contains(parametr) ||
+        x.Address.Contains(parametr) ||
+        (x.Genre != null && x.Genre.Name.Contains(parametr)) ||
+        x.Telephone.Contains(parametr) ||
+        (parseDate && x.DateOfBirth.Date == dateTime)
+    ).ToListAsync();
+            var fulldata = PatientFullData.ToFullData(fullDataPatient);
+			return fulldata;
+        }
+    }
 }

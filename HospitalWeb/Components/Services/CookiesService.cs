@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
+using System.Diagnostics;
 using System.Net;
 using System.Runtime.CompilerServices;
 
@@ -6,12 +8,11 @@ namespace HospitalWeb.Components.Services
 {
     public class CookiesService
     {
-        private readonly IHttpContextAccessor httpContextAccessor;
-        private HttpContext httpContext => httpContextAccessor.HttpContext;
+        private readonly IJSRuntime jsRuntime;
 
-        public CookiesService(IHttpContextAccessor httpContextAccessor)
+        public CookiesService(IJSRuntime jsRuntime)
         {
-            this.httpContextAccessor = httpContextAccessor;
+            this.jsRuntime = jsRuntime;
         }
 
         public enum Keys
@@ -30,23 +31,9 @@ namespace HospitalWeb.Components.Services
             insuranceEndVisible,
             medCardCreateVisible,
         }
-        public void SetCookie(Keys key, string value, uint Days = 1)
+        public async void SetCookie(Keys key, string value, int Days = 1)
         {
-            //TODO: Разобраться с куками
-//            4.Используйте IResponseCookies для более точного управления куками
-//Вместо прямого использования HttpResponse.Cookies, вы можете
-//                использовать IResponseCookies, который предоставляет более точный контроль над установкой кук.
-            var options = new CookieOptions()
-            {
-                Expires = DateTime.Now.AddDays(Days)
-            };
-            httpContextAccessor.HttpContext.Response.OnStarting(() =>
-            {
-                httpContextAccessor.HttpContext.Response.Cookies.Append(key.ToString(), value, options);
-                return Task.CompletedTask;
-            });
-            //Debug.WriteLine($"Не установились куки: [{key.ToString()}] = {value}");
-
+            await jsRuntime.InvokeVoidAsync("setCookie", key.ToString(), value, Days);
         }
 
         public enum Types
@@ -54,22 +41,12 @@ namespace HospitalWeb.Components.Services
             @string,
             @bool
         }
-        public object GetCookie(Keys keys, Types type)
+        //TODO:  Надо сделать обработку для всех!
+        //TODO: заменить true false(string) на 1 и 0(string)
+        public async Task<string> GetCookie(Keys keys)
         {
-            switch (type)
-            {
-                case Types.@string:
-                    return httpContext.Request.Cookies[keys.ToString()];
-                case Types.@bool:
-                    var response = httpContext.Request.Cookies[keys.ToString()];
-                    if (response == "false") return false;
-                    if (response == "true") return true;
-                    break;
-                default:
-                    return httpContext.Request.Cookies[keys.ToString()];
-            }
-            return httpContext.Request.Cookies[keys.ToString()];
-
+            return await jsRuntime.InvokeAsync<string>("getCookie", keys.ToString());
+            
         }
 
     }

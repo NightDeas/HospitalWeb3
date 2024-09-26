@@ -20,5 +20,5 @@ namespace DataBase
 			optionsBuilder.UseSqlServer(DataBase.DataBaseService.GetConnectionString());
 			return new Context(optionsBuilder.Options);
 		}
-	}
+    }
 }

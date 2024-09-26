@@ -30,6 +30,7 @@ namespace HospitalWeb
                 options.UseSqlServer(builder.Configuration.GetConnectionString("spek"));
             });
             builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<HttpContextAccessor>();
             builder.Services.AddScoped<CookiesService>();
             builder.Services.AddScoped<PatientOperationService>();
             builder.Services.AddScoped<DataBase.Operations.IDefaultOperationDbEntity<Patient>, PatientOperationService>();

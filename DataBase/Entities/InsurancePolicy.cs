@@ -6,7 +6,7 @@ namespace DataBase.Entities
 	{
 		public InsurancePolicy()
 		{
-			End = DateTime.Now;
+			End = DateTime.Now.AddYears(10);
 		}
 
 		[MaxLength(16)]

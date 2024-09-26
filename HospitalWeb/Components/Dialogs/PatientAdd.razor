@@ -10,106 +10,153 @@
 @using System.ComponentModel.DataAnnotations
 @rendermode InteractiveServer
 <MudDialog Style="width: 600px">
-	<TitleContent>
-		<MudText Color="Color.Tertiary" Typo="Typo.h3">Добавление пациента</MudText>
-	</TitleContent>
-	<DialogContent>
-		<MudForm @ref="MudForm" @bind-IsValid="valid">
-			<MudGrid>
-				<MudItem xs="6">
-					<MudText Typo="Typo.h5" Color="Color.Primary">Основная информация</MudText>
-					<MudTextField Label="Фамилия" @bind-Value="patient.LastName" Variant="MudBlazor.Variant.Text" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
-					<MudTextField Label="Имя" @bind-Value="patient.FirstName" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
-					<MudTextField HelperText="При наличии" Label="Отчество" Required="false" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
-					<MudTextField @bind-Value="patient.DateOfBirth" InputType="InputType.Date" Format="yyyy-MM-dd" Label="Дата рождения" Required="true" RequiredError="@ERROR_REQUIRED" T="DateTime"></MudTextField>
-					<MudTextField @bind-Value="patient.Passport" T="string" Label="Серия и номер паспорта" Mask="@(new PatternMask("0000 000000"))" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
-					<GenreControl @bind-Value="patient.GenreId"></GenreControl>
-				</MudItem>
-				<MudItem xs="6">
-					<MudStack>
-						<MudItem>
-							<MudText Typo="Typo.h5" Color="Color.Primary">Страховой полис</MudText>
-							<MudTextField @bind-Value="insurancePolicy.Number" Mask="@(new PatternMask("0000000000000000"))" HelperText="Страховой полис состоит из 16 цифр" MaxLength="16" Label="Номер страхового полиса" Required="true" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
-							<MudTextField @bind-Value="insurancePolicy.End" Format="yyyy-MM-dd" InputType="InputType.Date" Label="Дата окончания страхового полиса" Required="true" RequiredError="@ERROR_REQUIRED" T="DateTime"></MudTextField>
-						</MudItem>
-						<MudItem>
-							<MudText Typo="Typo.h5" Color="Color.Primary">Для связи</MudText>
-							<MudTextField @bind-Value="patient.Email" Validation="@(new EmailAddressAttribute(){ErrorMessage = "Не валидное поле: Почта"})" Label="Почта" Required="false" T="string"></MudTextField>
-							<MudTextField @bind-Value="patient.Telephone" For="@(() => patient.Telephone)" ErrorText="Не валидное поле" Label="Телефон" Required="false" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
-						</MudItem>
-						<MudItem>
-							<MudText Typo="Typo.h5" Color="Color.Primary">Адреса</MudText>
-							<MudTextField @bind-Value="patient.Address" Lines="3" Label="Домашний адрес" Required="true" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
-							<MudTextField @bind-Value="patient.WorkAddress" Lines="3" Label="Рабочий адрес" Required="false" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
-						</MudItem>
-					</MudStack>
-				</MudItem>
-				<MudItem xs="12">
-					<MudText Color="Color.Error" Align="Align.Center" hidden="@hiddenGlobalErrorText">Поля с * обязательны для заполнения</MudText>
-				</MudItem>
-			</MudGrid>
-		</MudForm>
-	</DialogContent>
-	<DialogActions>
-		<MudButton Color="Color.Primary" OnClick="CreatePatient">Добавить</MudButton>
-		<MudButton Color="Color.Error" OnClick="Cancel">Отмена</MudButton>
-	</DialogActions>
+    <TitleContent>
+        <MudText Color="Color.Tertiary" Typo="Typo.h3">Добавление пациента</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="MudForm" @bind-IsValid="valid">
+            <MudGrid>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.h5" Color="Color.Primary">Основная информация</MudText>
+                    <MudTextField Label="Фамилия" @bind-Value="patient.LastName" Variant="MudBlazor.Variant.Text" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
+                    <MudTextField Label="Имя" @bind-Value="patient.FirstName" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
+                    <MudTextField HelperText="При наличии" Label="Отчество" Required="false" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
+                    <MudTextField @bind-Value="patient.DateOfBirth" InputType="InputType.Date" Format="yyyy-MM-dd" Label="Дата рождения" Required="true" RequiredError="@ERROR_REQUIRED" T="DateTime"></MudTextField>
+                    <MudTextField @bind-Value="patient.Passport" T="string" Label="Серия и номер паспорта" Mask="@(new PatternMask("0000 000000"))" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
+                    <GenreControl @bind-Value="patient.GenreId"></GenreControl>
+                    <MudText Typo="Typo.h5" Color="Color.Primary">Фотография пациента</MudText>
+                    <MudFileUpload T="IBrowserFile" Accept=".png, .jpg" FilesChanged="UploadFile" MaximumFileCount="100">
+                        <ActivatorContent>
+                            <MudButton Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.CloudUpload">
+                                Выбрать фото
+                            </MudButton>
+                        </ActivatorContent>
+                    </MudFileUpload>
+                    <MudText>@FileName</MudText>
+                    <MudImage Src="@ImageSource" Style="width: 150px; height: 150px"></MudImage>
+                    <MudButton hidden="@visibleDeletePhotoButton" @onclick="DeletePhoto">Удалить фото</MudButton>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudStack>
+                        <MudItem>
+                            <MudText Typo="Typo.h5" Color="Color.Primary">Страховой полис</MudText>
+                            <MudTextField @bind-Value="insurancePolicy.Number" Mask="@(new PatternMask("0000000000000000"))" HelperText="Страховой полис состоит из 16 цифр" MaxLength="16" Label="Номер страхового полиса" Required="true" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
+                            <MudTextField @bind-Value="insurancePolicy.End" Format="yyyy-MM-dd" InputType="InputType.Date" Label="Дата окончания страхового полиса" Required="true" RequiredError="@ERROR_REQUIRED" T="DateTime"></MudTextField>
+                        </MudItem>
+                        <MudItem>
+                            <MudText Typo="Typo.h5" Color="Color.Primary">Для связи</MudText>
+                            <MudTextField @bind-Value="patient.Email" Validation="@(new EmailAddressAttribute(){ErrorMessage = "Не валидное поле: Почта"})" Label="Почта" Required="false" T="string"></MudTextField>
+                            <MudTextField @bind-Value="patient.Telephone" For="@(() => patient.Telephone)" ErrorText="Не валидное поле" Label="Телефон" Required="false" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
+                        </MudItem>
+                        <MudItem>
+                            <MudText Typo="Typo.h5" Color="Color.Primary">Адреса</MudText>
+                            <MudTextField @bind-Value="patient.Address" Lines="3" Label="Домашний адрес" Required="true" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
+                            <MudTextField @bind-Value="patient.WorkAddress" Lines="3" Label="Рабочий адрес" Required="false" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
+                        </MudItem>
+
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudText Color="Color.Error" Align="Align.Center" hidden="@hiddenGlobalErrorText">Поля с * обязательны для заполнения</MudText>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="CreatePatient">Добавить</MudButton>
+        <MudButton Color="Color.Error" OnClick="Cancel">Отмена</MudButton>
+    </DialogActions>
 </MudDialog>
 
 @code {
 
 
+    const string ERROR_REQUIRED = "Обязатльное поле для заполнения";
+    private bool valid;
+    private bool hiddenGlobalErrorText = true;
+    [CascadingParameter]
+    private MudDialogInstance MudDialogInstance { get; set; }
+
+    private MudDialog MudDialog;
+    private MudForm MudForm;
+
+    private void Submit() => MudDialogInstance.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialogInstance.Cancel();
+
+    DataBase.Entities.Patient patient = new();
+    DataBase.Entities.InsurancePolicy insurancePolicy = new();
+    DataBase.Entities.MedCard medCard = new();
+
+
+    IBrowserFile photoPatient;
+    string fileName;
+    string _defaultFileName = "Фото не загружено";
+    public string FileName
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(fileName))
+                return _defaultFileName;
+            else return fileName;
+        }
+        set => fileName = value;
+    }
 
 
 
+    const long PHOTO_SIZE = 10 * 1024 * 1024;
+    string ImageSource;
+    bool visibleDeletePhotoButton => FileName == _defaultFileName ? true : false;
+
+    private async Task UploadFile(IBrowserFile file)
+    {
+        this.photoPatient = file;
+        Stream stream = file.OpenReadStream(PHOTO_SIZE);
+        MemoryStream memoryStream = new();
+        await stream.CopyToAsync(memoryStream);
+        byte[] photoBytes = memoryStream.ToArray();
+        patient.Photo = photoBytes;
+        FileName = file.Name;
+        var imageSrc = Convert.ToBase64String(photoBytes);
+        ImageSource = string.Format("data:image/jpeg;base64,{0}", imageSrc);
+
+        stream.Close();
+        memoryStream.Close();
+    }
+
+    private async void DeletePhoto()
+    {
+        photoPatient = null;
+        patient.Photo = null;
+        FileName = string.Empty;
+        ImageSource = string.Empty;
+    }
+
+    async void CloseDialog() => await MudDialog.CloseAsync();
+
+    async void CreatePatient()
+    {
+        if (!valid)
+        {
+            await this.MudForm.Validate();
+            hiddenGlobalErrorText = false;
+            return;
+        }
+        int tempId = await patientServ.AddAsync(patient);
+        if (tempId == 0)
+            throw new();
+        medCard.PatientId = tempId;
+        insurancePolicy.PatientId = tempId;
+        tempId = await medCardServ.AddAsync(medCard);
+        if (tempId == 0)
+            throw new();
+        tempId = await InsurancePolicyServ.AddAsync(insurancePolicy);
+        if (tempId == 0)
+            throw new();
+        SbService.Add("Пациент добавлен в базу", Severity.Success);
 
 
-	const string ERROR_REQUIRED = "Обязатльное поле для заполнения";
-	private bool valid;
-	private bool hiddenGlobalErrorText = true;
-	[CascadingParameter]
-	private MudDialogInstance MudDialogInstance { get; set; }
-
-	private MudDialog MudDialog;
-	private MudForm MudForm;
-
-	private void Submit() => MudDialogInstance.Close(DialogResult.Ok(true));
-
-	private void Cancel() => MudDialogInstance.Cancel();
-
-	DataBase.Entities.Patient patient = new();
-	DataBase.Entities.InsurancePolicy insurancePolicy = new();
-	DataBase.Entities.MedCard medCard = new();
-
-
-	void LastNameMTTextChanged(string value) => patient.LastName = value;
-
-
-
-	async void CloseDialog() => await MudDialog.CloseAsync();
-
-	async void CreatePatient()
-	{
-		if (!valid)
-		{
-			await this.MudForm.Validate();
-			hiddenGlobalErrorText = false;
-			return;
-		}
-		int tempId = await patientServ.AddAsync(patient);
-		if (tempId == 0)
-			throw new();
-		medCard.PatientId = tempId;
-		insurancePolicy.PatientId = tempId;
-		tempId = await medCardServ.AddAsync(medCard);
-		if (tempId == 0)
-			throw new();
-		tempId = await InsurancePolicyServ.AddAsync(insurancePolicy);
-		if (tempId == 0)
-			throw new();
-			SbService.Add("Пациент добавлен в базу", Severity.Success);
-			await MudDialog.CloseAsync();
-			
-
-	}
+    }
 }
