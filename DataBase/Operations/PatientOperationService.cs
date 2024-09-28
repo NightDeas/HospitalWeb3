@@ -39,12 +39,15 @@ namespace DataBase.Operations
 
         public async Task<Patient> Get(int id)
         {
-			throw new NotImplementedException();
+			return await Context.Patients
+				.Include(x => x.Genre)
+				.FirstAsync(x => x.Id == id);
         }
 
         public async Task<List<Patient>> GetAll()
         {
 			return await Context.Patients
+				.AsNoTracking()
 				.Include(x=> x.Genre)
 				.ToListAsync();
         }
@@ -81,7 +84,6 @@ namespace DataBase.Operations
         public async Task<List<PatientFullData>> GetFullData(string parametr)
         {
 			bool parseDate = DateTime.TryParse(parametr, out DateTime dateTime);
-			var test = await Context.Patients.Include(x => x.MedCard).ToListAsync();
             var fullDataPatient = await Context.Patients
     .Include(x => x.Genre)
     .Include(x => x.MedCard)
@@ -100,7 +102,7 @@ namespace DataBase.Operations
         (x.Genre != null && x.Genre.Name.Contains(parametr)) ||
         x.Telephone.Contains(parametr) ||
         (parseDate && x.DateOfBirth.Date == dateTime)
-    ).ToListAsync();
+    ).AsNoTracking().ToListAsync();
             var fulldata = PatientFullData.ToFullData(fullDataPatient);
 			return fulldata;
         }

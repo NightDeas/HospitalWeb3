@@ -10,7 +10,7 @@ namespace DataBase.Operations
     /// Получение данных для пациента
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal interface IPatientDataOperation<T>
+    public interface IPatientDataOperation<T>
     {
         Task<T> GetByPatient(int patientId);
     }

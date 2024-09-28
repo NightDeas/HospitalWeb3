@@ -1,29 +1,28 @@
 ﻿@page "/patientAdd"
+@using DataBase.Models
 @using DataBase.Operations
 @using DataBase.Entities
-@inject IDefaultOperationDbEntity<Patient> patientServ;
+@inject IDefaultOperationDbEntity<Patient> PatientServ;
 @inject IDefaultOperationDbEntity<MedCard> medCardServ;
 @inject IDefaultOperationDbEntity<InsurancePolicy> InsurancePolicyServ;
+@inject IPatientDataOperation<InsurancePolicy> InsurancePolicyToPatientServ;
+@inject IPatientDataOperation<MedCard> MedCardToPatientToPatientServ;
 @inject ISnackbar SbService;
+@inject IPhotoService photoService;
 @using HospitalWeb.Components.Controls;
+@using HospitalWeb.Components.Interfaces
 @using Radzen.Blazor;
 @using System.ComponentModel.DataAnnotations
 @rendermode InteractiveServer
 <MudDialog Style="width: 600px">
     <TitleContent>
-        <MudText Color="Color.Tertiary" Typo="Typo.h3">Добавление пациента</MudText>
+        <MudText Color="Color.Tertiary" Typo="Typo.h3">@titleContentString</MudText>
     </TitleContent>
     <DialogContent>
         <MudForm @ref="MudForm" @bind-IsValid="valid">
             <MudGrid>
                 <MudItem xs="6">
                     <MudText Typo="Typo.h5" Color="Color.Primary">Основная информация</MudText>
-                    <MudTextField Label="Фамилия" @bind-Value="patient.LastName" Variant="MudBlazor.Variant.Text" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
-                    <MudTextField Label="Имя" @bind-Value="patient.FirstName" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
-                    <MudTextField HelperText="При наличии" Label="Отчество" Required="false" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
-                    <MudTextField @bind-Value="patient.DateOfBirth" InputType="InputType.Date" Format="yyyy-MM-dd" Label="Дата рождения" Required="true" RequiredError="@ERROR_REQUIRED" T="DateTime"></MudTextField>
-                    <MudTextField @bind-Value="patient.Passport" T="string" Label="Серия и номер паспорта" Mask="@(new PatternMask("0000 000000"))" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
-                    <GenreControl @bind-Value="patient.GenreId"></GenreControl>
                     <MudText Typo="Typo.h5" Color="Color.Primary">Фотография пациента</MudText>
                     <MudFileUpload T="IBrowserFile" Accept=".png, .jpg" FilesChanged="UploadFile" MaximumFileCount="100">
                         <ActivatorContent>
@@ -33,6 +32,12 @@
                             </MudButton>
                         </ActivatorContent>
                     </MudFileUpload>
+                    <MudTextField Label="Фамилия" @bind-Value="patient.LastName" Variant="MudBlazor.Variant.Text" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
+                    <MudTextField Label="Имя" @bind-Value="patient.FirstName" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
+                    <MudTextField HelperText="При наличии" Label="Отчество" Required="false" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
+                    <MudTextField @bind-Value="patient.DateOfBirth" InputType="InputType.Date" Format="yyyy-MM-dd" Label="Дата рождения" Required="true" RequiredError="@ERROR_REQUIRED" T="DateTime"></MudTextField>
+                    <MudTextField @bind-Value="patient.Passport" T="string" Label="Серия и номер паспорта" Mask="@(new PatternMask("0000 000000"))" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
+                    <GenreControl @bind-Value="patient.GenreId"></GenreControl>
                     <MudText>@FileName</MudText>
                     <MudImage Src="@ImageSource" Style="width: 150px; height: 150px"></MudImage>
                     <MudButton hidden="@visibleDeletePhotoButton" @onclick="DeletePhoto">Удалить фото</MudButton>
@@ -104,7 +109,30 @@
         set => fileName = value;
     }
 
+    MudText TitleContent;
+    public enum TypeOperation
+    {
+        Create,
+        Edit
+    }
 
+    [Parameter]
+    public int PatientId { get; set; }
+
+    private string titleContentString = "Управление пациентом";
+    protected override void OnInitialized()
+    {
+        if (PatientId == 0)
+            titleContentString = "Регистрация нового пациента";
+        else
+        {
+            titleContentString = "Редактирование существующего пациента";
+            LoadData();
+            // StateHasChanged();
+        }
+    }
+}
+@code{
 
     const long PHOTO_SIZE = 10 * 1024 * 1024;
     string ImageSource;
@@ -119,11 +147,16 @@
         byte[] photoBytes = memoryStream.ToArray();
         patient.Photo = photoBytes;
         FileName = file.Name;
-        var imageSrc = Convert.ToBase64String(photoBytes);
-        ImageSource = string.Format("data:image/jpeg;base64,{0}", imageSrc);
-
+        ImageSource = photoService.GetBase64Photo(photoBytes);
         stream.Close();
         memoryStream.Close();
+    }
+
+    private async void LoadData()
+    {
+        patient = await PatientServ.Get(PatientId);
+        medCard = await MedCardToPatientToPatientServ.GetByPatient(PatientId);
+        insurancePolicy = await InsurancePolicyToPatientServ.GetByPatient(PatientId);
     }
 
     private async void DeletePhoto()
@@ -144,7 +177,7 @@
             hiddenGlobalErrorText = false;
             return;
         }
-        int tempId = await patientServ.AddAsync(patient);
+        int tempId = await PatientServ.AddAsync(patient);
         if (tempId == 0)
             throw new();
         medCard.PatientId = tempId;

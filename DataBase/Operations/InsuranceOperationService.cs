@@ -34,7 +34,7 @@ namespace DataBase.Operations
             throw new NotImplementedException();
         }
 
-        public Task<InsurancePolicy> Get(int id)
+        public async Task<InsurancePolicy> Get(int id)
         {
             throw new NotImplementedException();
         }
@@ -46,7 +46,7 @@ namespace DataBase.Operations
 
         public async Task<InsurancePolicy> GetByPatient(int patientId)
         {
-            return await context.InsurancePolicies.FirstAsync(x => x.PatientId == patientId);
+            return await context.InsurancePolicies.AsNoTracking().FirstAsync(x => x.PatientId == patientId);
         }
 
         public Task<List<InsurancePolicy>> GetPatientsAsync()

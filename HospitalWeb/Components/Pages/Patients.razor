@@ -5,10 +5,16 @@
 @inject IDefaultOperationDbEntity<Patient> patientServ;
 @inject PatientOperationService patientFullDataService;
 @inject Services.CookiesService cookieService;
+@inject IPhotoService photoService;
 @using System.Net.Http.Json
 @using DataBase.Entities
 @using DataBase.Operations
+@using HospitalWeb.Components.Interfaces
+@using HospitalWeb.Components.Models
 @using Keys = Services.CookiesService.Keys;
+@using MudBlazor;
+@using MudBlazorFix;
+@using static HospitalWeb.Components.Dialogs.PatientAdd
 <MudGrid Spacing="6">
     <MudItem xs="3">
         <MudStack>
@@ -75,7 +81,7 @@
         <MudPaper class="pa-5 ma-2" style="height: 80vh" Outlined="true">
             <RadzenText>Поиск</RadzenText>
             <RadzenTextBox @bind-Value="SearchText" Style="width: 50vh"></RadzenTextBox>
-            <MudDataGrid Items="@patients">
+            <MudDataGrid ReadOnly="false" Items="@patients">
                 <Columns>
                     <PropertyColumn Property="x => x.Patient.FullName" Title="ФИО" />
                     <PropertyColumn Property="x => x.Patient.DateOfBirth" Format="dd.MM.yyyy" Hidden="@(!_columnVisibility[Keys.dateOfBirthColumnVisible])" Title="Дата рождения" />
@@ -88,14 +94,18 @@
                     <PropertyColumn Property="x => x.InsurancePolicy.Number" Hidden="@(!_columnVisibility[Keys.insuranceNumberVisible])" Title="Номер полиса" />
                     <PropertyColumn Property="x => x.InsurancePolicy.End" Format="dd.MM.yyyy" Hidden="@(!_columnVisibility[Keys.insuranceEndVisible])" Title="Срок окончания полиса" />
                     <PropertyColumn Property="x => x.MedCard.Created" Format="dd.MM.yyyy" HiddFormat="dd.MM.yyyy" en="@(!_columnVisibility[Keys.medCardCreateVisible])" Title="Дата создания мед карты" />
-                </Columns>
+                    <TemplateColumn>
+                        <CellTemplate>
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => OpenDialogPatient(context.Item.Patient.Id))"></MudIconButton>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    </Columns>
             </MudDataGrid>
         </MudPaper>
     </MudItem>
     <MudItem xs="12" Style="height: 10vh">
         <MudGrid Justify="Justify.Center">
-            <MudButton OnClick="OpenDialogAddPatient" Color="Color.Primary">Добавить</MudButton>
-            <MudButton OnClick="OpenDialogEditPatient" Color="Color.Primary">Добавить</MudButton>
+            <MudButton OnClick="() => OpenDialogPatient()" Color="Color.Primary">Добавить</MudButton>
         </MudGrid>
     </MudItem>
 </MudGrid>
@@ -115,100 +125,7 @@
         { Keys.medCardCreateVisible, false }
     };
 
-    #region на удаление, после теста
 
-    // bool dateOfBirthColumnVisible = true;
-    // bool DateOfBirthColumnVisible
-    // {
-    //     get => dateOfBirthColumnVisible; set
-
-    //     {
-    //         dateOfBirthColumnVisible = value;
-    //         SaveParametrInCookie(Keys.dateOfBirthColumnVisible, value);
-    //     }
-    // }
-    // bool telephoneColumnVisible = true;
-    // bool TelephoneColumnVisible
-    // {
-    //     get => telephoneColumnVisible; set
-    //     {
-    //         telephoneColumnVisible = value;
-    //         SaveParametrInCookie(Keys.telephoneColumnVisible, value);
-    //     }
-    // }
-    // bool mailColumnVisible = false;
-    // bool MailColumnVisible
-    // {
-    //     get => mailColumnVisible; set
-    //     {
-    //         mailColumnVisible = value;
-    //         SaveParametrInCookie(Keys.mailColumnVisible, value);
-    //     }
-    // }
-    // bool passportColumnVisible = false;
-    // bool PassportColumnVisible
-    // {
-    //     get => passportColumnVisible; set
-    //     {
-    //         passportColumnVisible = value;
-    //         SaveParametrInCookie(Keys.passportColumnVisible, value);
-    //     }
-    // }
-    // bool adressColumnVisible = true;
-    // bool AdressColumnVisible
-    // {
-    //     get => adressColumnVisible; set
-    //     {
-    //         adressColumnVisible = value;
-    //         SaveParametrInCookie(Keys.adressColumnVisible, value);
-    //     }
-    // }
-    // bool workAdressColumnVisible = false;
-    // bool WorkAdressColumnVisible
-    // {
-    //     get => workAdressColumnVisible; set
-    //     {
-    //         workAdressColumnVisible = value;
-    //         SaveParametrInCookie(Keys.workAdressColumnVisible, value);
-    //     }
-    // }
-    // bool genreColumnVisible = false;
-    // bool GenreColumnVisible
-    // {
-    //     get => genreColumnVisible; set
-    //     {
-    //         genreColumnVisible = value;
-    //         SaveParametrInCookie(Keys.genreColumnVisible, value);
-    //     }
-    // }
-    // bool insuranceNumberVisible = false;
-    // bool InsuranceNumberVisible
-    // {
-    //     get => insuranceNumberVisible; set
-    //     {
-    //         insuranceNumberVisible = value;
-    //         SaveParametrInCookie(Keys.insuranceNumberVisible, value);
-    //     }
-    // }
-    // bool insuranceEndVisible = false;
-    // bool InsuranceEndVisible
-    // {
-    //     get => insuranceEndVisible; set
-    //     {
-    //         insuranceEndVisible = value;
-    //         SaveParametrInCookie(Keys.insuranceEndVisible, value);
-    //     }
-    // }
-    // bool medCardCreateVisible = false;
-    // bool MedCardCreateVisible
-    // {
-    //     get => medCardCreateVisible; set
-    //     {
-    //         medCardCreateVisible = value;
-    //         SaveParametrInCookie(Keys.medCardCreateVisible, value);
-    //     }
-    // }
-    #endregion
 
     public bool this[Keys key]
     {
@@ -225,6 +142,7 @@
 
     public int _spcaing = 6;
     public List<DataBase.Models.PatientFullData> patients = new();
+    public DataBase.Models.PatientFullData patientFullData;
 
     private string searchText;
 
@@ -243,7 +161,6 @@
         string parametrInCookie = parametr ? "1" : "0";
         cookieService.SetCookie(keys, parametrInCookie, 31);
     }
-    //TODO: Дописать для всех столбцов
     async Task LoadCookieVisibleColumn()
     {
         foreach (var column in _columnVisibility.Keys)
@@ -266,7 +183,7 @@
             var patients = string.IsNullOrEmpty(SearchText) ? await GetPatients() : await GetPatients(SearchText);
             await InvokeAsync(() => SetPatients(patients));
             if (isTest) SnackBarService.Add("TEST:Таблица обновлена");
-            await Task.Delay(1500); // 10 second
+            await Task.Delay(1500); // 1.5 second
         }
     }
 
@@ -276,23 +193,20 @@
 
 
 
-
     void SetPatients(List<DataBase.Models.PatientFullData> patients)
     {
         this.patients = patients;
         StateHasChanged();
     }
+    public Task OpenDialogPatient() => OpenDialogPatient(0);
 
-
-    public Task OpenDialogAddPatient()
+    public Task OpenDialogPatient(int patientId)
     {
+        var parametrs = new DialogParameters<Dialogs.PatientAdd>
+        {
+            {x=> x.PatientId, patientId }
+        };
         var options = new MudBlazor.DialogOptions() { CloseOnEscapeKey = true };
-        return DialogServices.ShowAsync<Dialogs.PatientAdd>("test", options);
-    }
-
-    public Task OpenDialogEditPatient()
-    {
-        var options = new MudBlazor.DialogOptions() { CloseOnEscapeKey = true };
-        return DialogServices.ShowAsync<Dialogs.PatientEdit>("test", options);
+        return DialogServices.ShowAsync<Dialogs.PatientAdd>("test", parametrs, options);
     }
 }

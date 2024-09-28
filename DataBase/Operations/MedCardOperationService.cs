@@ -59,7 +59,7 @@ namespace DataBase.Operations
 
         public async Task<MedCard> GetByPatient(int patientId)
         {
-            return await context.MedCards.FirstAsync(c => c.PatientId == patientId);
+            return await context.MedCards.AsNoTracking().FirstAsync(c => c.PatientId == patientId);
         }
     }
 }

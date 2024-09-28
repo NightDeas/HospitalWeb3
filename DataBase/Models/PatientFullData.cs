@@ -1,4 +1,5 @@
 ﻿using DataBase.Entities;
+using System.Text.Json.Serialization;
 namespace DataBase.Models
 {
     /// <summary>
@@ -6,10 +7,11 @@ namespace DataBase.Models
     /// </summary>
     public class PatientFullData
     {
-        public Patient Patient;
-        public InsurancePolicy InsurancePolicy;
-        public MedCard MedCard;
+        public Patient Patient { get; set; }
+        public InsurancePolicy InsurancePolicy { get; set; }
+        public MedCard MedCard { get; set; }
 
+        [JsonConstructor]
         public PatientFullData(Patient patient, InsurancePolicy insurancePolicy, MedCard medCard)
         {
             Patient = patient;

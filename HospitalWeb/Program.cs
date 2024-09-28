@@ -7,6 +7,7 @@ using MudBlazor.Services;
 using Radzen;
 using MudBlazor;
 using HospitalWeb.Components.Services;
+using HospitalWeb.Components.Interfaces;
 
 
 namespace HospitalWeb
@@ -29,6 +30,7 @@ namespace HospitalWeb
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("spek"));
             });
+            builder.Services.AddScoped<Context>();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<HttpContextAccessor>();
             builder.Services.AddScoped<CookiesService>();
@@ -37,6 +39,9 @@ namespace HospitalWeb
             builder.Services.AddScoped<DataBase.Operations.IDefaultOperationDbEntity<MedCard>, MedCardOperationService>();
             builder.Services.AddScoped<DataBase.Operations.IDefaultOperationDbEntity<Genre>, GenreOperationService>();
             builder.Services.AddScoped<DataBase.Operations.IDefaultOperationDbEntity<InsurancePolicy>, InsuranceOperationService>();
+            builder.Services.AddScoped<DataBase.Operations.IPatientDataOperation<InsurancePolicy>, InsuranceOperationService>();
+            builder.Services.AddScoped<DataBase.Operations.IPatientDataOperation<MedCard>, MedCardOperationService>();
+            builder.Services.AddScoped<IPhotoService, PhotoService>();
             //builder.Services.AddSingleton<HospitalWeb.Components.Services.Notification.NotificationService>();
             var app = builder.Build();
 

@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace HospitalWeb.Components.Services
 {
+    //TODO: Надо бы уменьшить длину название cookie, дабы уменьшите размер.
     public class CookiesService
     {
         private readonly IJSRuntime jsRuntime;
@@ -41,8 +42,6 @@ namespace HospitalWeb.Components.Services
             @string,
             @bool
         }
-        //TODO:  Надо сделать обработку для всех!
-        //TODO: заменить true false(string) на 1 и 0(string)
         public async Task<string> GetCookie(Keys keys)
         {
             return await jsRuntime.InvokeAsync<string>("getCookie", keys.ToString());
