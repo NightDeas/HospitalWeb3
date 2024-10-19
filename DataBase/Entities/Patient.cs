@@ -10,12 +10,6 @@ namespace DataBase.Entities
     [PrimaryKey("Id")]
     public partial class Patient : DefaultEntity
     {
-
-        public Patient()
-		{
-            DateOfBirth = DateTime.Now;
-		}
-
         [Required]
         public string LastName { get; set; }
 		[Required]

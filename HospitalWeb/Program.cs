@@ -8,6 +8,7 @@ using Radzen;
 using MudBlazor;
 using HospitalWeb.Components.Services;
 using HospitalWeb.Components.Interfaces;
+using HospitalWeb.Components.Services.Api;
 
 
 namespace HospitalWeb
@@ -42,6 +43,13 @@ namespace HospitalWeb
             builder.Services.AddScoped<DataBase.Operations.IPatientDataOperation<InsurancePolicy>, InsuranceOperationService>();
             builder.Services.AddScoped<DataBase.Operations.IPatientDataOperation<MedCard>, MedCardOperationService>();
             builder.Services.AddScoped<IPhotoService, PhotoService>();
+
+
+            builder.Services.AddHttpClient();
+            builder.Services.AddScoped<PatientApiService>();
+            builder.Services.AddScoped<MedCardApiService>();
+            builder.Services.AddScoped<InsurancePolicyApiService>();
+
             //builder.Services.AddSingleton<HospitalWeb.Components.Services.Notification.NotificationService>();
             var app = builder.Build();
 

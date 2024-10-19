@@ -2,15 +2,14 @@
 @using DataBase.Models
 @using DataBase.Operations
 @using DataBase.Entities
-@inject IDefaultOperationDbEntity<Patient> PatientServ;
-@inject IDefaultOperationDbEntity<MedCard> medCardServ;
-@inject IDefaultOperationDbEntity<InsurancePolicy> InsurancePolicyServ;
-@inject IPatientDataOperation<InsurancePolicy> InsurancePolicyToPatientServ;
-@inject IPatientDataOperation<MedCard> MedCardToPatientToPatientServ;
+@inject PatientApiService PatientApiService;
+@inject MedCardApiService MedCardApiService;
+@inject InsurancePolicyApiService InsurancePolicyApiService;
 @inject ISnackbar SbService;
 @inject IPhotoService photoService;
 @using HospitalWeb.Components.Controls;
 @using HospitalWeb.Components.Interfaces
+@using HospitalWeb.Components.Services.Api
 @using Radzen.Blazor;
 @using System.ComponentModel.DataAnnotations
 @rendermode InteractiveServer
@@ -90,9 +89,9 @@
 
     private void Cancel() => MudDialogInstance.Cancel();
 
-    DataBase.Entities.Patient patient = new();
-    DataBase.Entities.InsurancePolicy insurancePolicy = new();
-    DataBase.Entities.MedCard medCard = new();
+    Domain.DTOModels.Patient.PatientDTOResponse patient = new();
+    Domain.DTOModels.Insurance.InsurancePolicyDTOResponse insurancePolicy = new();
+    Domain.DTOModels.MedCard.MedCardDTOResponse medCard = new();
 
 
     IBrowserFile photoPatient;
@@ -130,6 +129,7 @@
             LoadData();
             // StateHasChanged();
         }
+        StateHasChanged();
     }
 }
 @code{
@@ -154,9 +154,11 @@
 
     private async void LoadData()
     {
-        patient = await PatientServ.Get(PatientId);
-        medCard = await MedCardToPatientToPatientServ.GetByPatient(PatientId);
-        insurancePolicy = await InsurancePolicyToPatientServ.GetByPatient(PatientId);
+        patient = await PatientApiService.Get(PatientId);
+        medCard = await MedCardApiService.GetByPatient(PatientId);
+        insurancePolicy = await InsurancePolicyApiService.GetByPatient(PatientId);
+
+        StateHasChanged();
     }
 
     private async void DeletePhoto()
@@ -165,30 +167,31 @@
         patient.Photo = null;
         FileName = string.Empty;
         ImageSource = string.Empty;
+        string name = "df";
     }
 
     async void CloseDialog() => await MudDialog.CloseAsync();
 
     async void CreatePatient()
     {
-        if (!valid)
-        {
-            await this.MudForm.Validate();
-            hiddenGlobalErrorText = false;
-            return;
-        }
-        int tempId = await PatientServ.AddAsync(patient);
-        if (tempId == 0)
-            throw new();
-        medCard.PatientId = tempId;
-        insurancePolicy.PatientId = tempId;
-        tempId = await medCardServ.AddAsync(medCard);
-        if (tempId == 0)
-            throw new();
-        tempId = await InsurancePolicyServ.AddAsync(insurancePolicy);
-        if (tempId == 0)
-            throw new();
-        SbService.Add("Пациент добавлен в базу", Severity.Success);
+        // if (!valid)
+        // {
+        //     await this.MudForm.Validate();
+        //     hiddenGlobalErrorText = false;
+        //     return;
+        // }
+        // int tempId = await PatientServ.AddAsync(patient);
+        // if (tempId == 0)
+        //     throw new();
+        // medCard.PatientId = tempId;
+        // insurancePolicy.PatientId = tempId;
+        // tempId = await medCardServ.AddAsync(medCard);
+        // if (tempId == 0)
+        //     throw new();
+        // tempId = await InsurancePolicyServ.AddAsync(insurancePolicy);
+        // if (tempId == 0)
+        //     throw new();
+        // SbService.Add("Пациент добавлен в базу", Severity.Success);
 
 
     }

@@ -6,6 +6,8 @@
 @inject PatientOperationService patientFullDataService;
 @inject Services.CookiesService cookieService;
 @inject IPhotoService photoService;
+
+@inject Services.Api.PatientApiService PatientApiService;
 @using System.Net.Http.Json
 @using DataBase.Entities
 @using DataBase.Operations
@@ -83,20 +85,20 @@
             <RadzenTextBox @bind-Value="SearchText" Style="width: 50vh"></RadzenTextBox>
             <MudDataGrid ReadOnly="false" Items="@patients">
                 <Columns>
-                    <PropertyColumn Property="x => x.Patient.FullName" Title="ФИО" />
-                    <PropertyColumn Property="x => x.Patient.DateOfBirth" Format="dd.MM.yyyy" Hidden="@(!_columnVisibility[Keys.dateOfBirthColumnVisible])" Title="Дата рождения" />
-                    <PropertyColumn Property="x => x.Patient.Address" Hidden="@(!_columnVisibility[Keys.adressColumnVisible])" Title="Адрес" />
-                    <PropertyColumn Property="x => x.Patient.WorkAddress" Hidden="@(!_columnVisibility[Keys.workAdressColumnVisible])" Title="Рабочий адрес" />
-                    <PropertyColumn Property="x => x.Patient.Telephone" Hidden="@(!_columnVisibility[Keys.telephoneColumnVisible])" Title="Телефон" />
-                    <PropertyColumn Property="x => x.Patient.Email" Hidden="@(!_columnVisibility[Keys.mailColumnVisible])" Title="Почта" />
-                    <PropertyColumn Property="x => x.Patient.Genre.Name" Hidden="@(!_columnVisibility[Keys.genreColumnVisible])" Title="Пол" />
-                    <PropertyColumn Property="x => x.Patient.Passport" Hidden="@(!_columnVisibility[Keys.passportColumnVisible])" Title="Паспорт" />
-                    <PropertyColumn Property="x => x.InsurancePolicy.Number" Hidden="@(!_columnVisibility[Keys.insuranceNumberVisible])" Title="Номер полиса" />
-                    <PropertyColumn Property="x => x.InsurancePolicy.End" Format="dd.MM.yyyy" Hidden="@(!_columnVisibility[Keys.insuranceEndVisible])" Title="Срок окончания полиса" />
-                    <PropertyColumn Property="x => x.MedCard.Created" Format="dd.MM.yyyy" HiddFormat="dd.MM.yyyy" en="@(!_columnVisibility[Keys.medCardCreateVisible])" Title="Дата создания мед карты" />
+                    <PropertyColumn Property="x => x.FullName" Title="ФИО" />
+                    <PropertyColumn Property="x => x.DateOfBirth" Format="dd.MM.yyyy" Hidden="@(!_columnVisibility[Keys.dateOfBirthColumnVisible])" Title="Дата рождения" />
+                    <PropertyColumn Property="x => x.Address" Hidden="@(!_columnVisibility[Keys.adressColumnVisible])" Title="Адрес" />
+                    <PropertyColumn Property="x => x.WorkAddress" Hidden="@(!_columnVisibility[Keys.workAdressColumnVisible])" Title="Рабочий адрес" />
+                    <PropertyColumn Property="x => x.Telephone" Hidden="@(!_columnVisibility[Keys.telephoneColumnVisible])" Title="Телефон" />
+                    <PropertyColumn Property="x => x.Email" Hidden="@(!_columnVisibility[Keys.mailColumnVisible])" Title="Почта" />
+                    <PropertyColumn Property="x => x.Genre" Hidden="@(!_columnVisibility[Keys.genreColumnVisible])" Title="Пол" />
+                    <PropertyColumn Property="x => x.Passport" Hidden="@(!_columnVisibility[Keys.passportColumnVisible])" Title="Паспорт" />
+                    <PropertyColumn Property="x => x.InsuranceNumber" Hidden="@(!_columnVisibility[Keys.insuranceNumberVisible])" Title="Номер полиса" />
+                    <PropertyColumn Property="x => x.InsuranceDateEnd" Format="dd.MM.yyyy" Hidden="@(!_columnVisibility[Keys.insuranceEndVisible])" Title="Срок окончания полиса" />
+                    <PropertyColumn Property="x => x.MedCardCreated" Hidden="@(!_columnVisibility[Keys.medCardCreateVisible])" Format="dd.MM.yyyy" Title="Дата создания мед карты" />
                     <TemplateColumn>
                         <CellTemplate>
-                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => OpenDialogPatient(context.Item.Patient.Id))"></MudIconButton>
+                            <MudIconButton  Size="Size.Small" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => OpenDialogPatient(context.Item.Id))"></MudIconButton>
                         </CellTemplate>
                     </TemplateColumn>
                     </Columns>
@@ -105,7 +107,7 @@
     </MudItem>
     <MudItem xs="12" Style="height: 10vh">
         <MudGrid Justify="Justify.Center">
-            <MudButton OnClick="() => OpenDialogPatient()" Color="Color.Primary">Добавить</MudButton>
+            <MudButton OnClick="() => OpenDialogPatient(0)" Color="Color.Primary">Добавить</MudButton>
         </MudGrid>
     </MudItem>
 </MudGrid>
@@ -141,7 +143,7 @@
 
 
     public int _spcaing = 6;
-    public List<DataBase.Models.PatientFullData> patients = new();
+    public List<Domain.DTOModels.Patient.PatientDTOResponseTableData> patients = new();
     public DataBase.Models.PatientFullData patientFullData;
 
     private string searchText;
@@ -188,17 +190,17 @@
     }
 
 
-    async Task<List<DataBase.Models.PatientFullData>> GetPatients() => await patientFullDataService.GetFullData();
-    async Task<List<DataBase.Models.PatientFullData>> GetPatients(string parametr) => await patientFullDataService.GetFullData(parametr);
+    async Task<List<Domain.DTOModels.Patient.PatientDTOResponseTableData>> GetPatients() => await PatientApiService.GetTableDatasAsync();
+    async Task<List<Domain.DTOModels.Patient.PatientDTOResponseTableData>> GetPatients(string parametr) => await PatientApiService.GetTableDatasAsync(parametr);
 
 
 
-    void SetPatients(List<DataBase.Models.PatientFullData> patients)
+    void SetPatients(List<Domain.DTOModels.Patient.PatientDTOResponseTableData> patients)
     {
         this.patients = patients;
         StateHasChanged();
     }
-    public Task OpenDialogPatient() => OpenDialogPatient(0);
+    // public Task OpenDialogPatient() => OpenDialogPatient();
 
     public Task OpenDialogPatient(int patientId)
     {
