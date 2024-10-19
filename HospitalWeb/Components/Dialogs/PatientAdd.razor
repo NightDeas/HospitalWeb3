@@ -14,17 +14,23 @@
 @using Radzen.Blazor;
 @using System.ComponentModel.DataAnnotations
 @rendermode InteractiveServer
-<MudDialog Style="width: 600px">
+<MudDialog @ref="MudDialog" Style="width: 600px">
     <TitleContent>
         <MudText Color="Color.Tertiary" Typo="Typo.h3">@titleContentString</MudText>
     </TitleContent>
     <DialogContent>
         <MudForm @ref="MudForm" @bind-IsValid="valid">
             <MudGrid>
-                @* НАДО ПРИ ЗАГРУЗКЕ СТРАНИЦЫ РЕДАКТИРОВАНИЯ ЗАГРУЖАТЬ ФОТО *@
                 <MudItem xs="6">
                     <MudText Typo="Typo.h5" Color="Color.Primary">Основная информация</MudText>
+                    <MudTextField Label="Фамилия" @bind-Value="patient.LastName" Variant="MudBlazor.Variant.Text" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
+                    <MudTextField Label="Имя" @bind-Value="patient.FirstName" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
+                    <MudTextField HelperText="При наличии" Label="Отчество" @bind-Value="patient.Patronymic" Required="false" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
+                    <MudTextField @bind-Value="patient.DateOfBirth" InputType="InputType.Date" Format="yyyy-MM-dd" Label="Дата рождения" Required="true" RequiredError="@ERROR_REQUIRED" T="DateTime"></MudTextField>
+                    <MudTextField @bind-Value="patient.Passport" T="string" Label="Серия и номер паспорта" Mask="@(new PatternMask("0000 000000"))" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
+                    <GenreControl @bind-Value="patient.GenreId"></GenreControl>
                     <MudText Typo="Typo.h5" Color="Color.Primary">Фотография пациента</MudText>
+                    <MudImage Src="@ImageSource" Style="width: 150px; height: 150px"></MudImage>
                     <MudFileUpload T="IBrowserFile" Accept=".png, .jpg" FilesChanged="UploadFile" MaximumFileCount="100">
                         <ActivatorContent>
                             <MudButton Color="Color.Primary"
@@ -33,14 +39,6 @@
                             </MudButton>
                         </ActivatorContent>
                     </MudFileUpload>
-                    <MudTextField Label="Фамилия" @bind-Value="patient.LastName" Variant="MudBlazor.Variant.Text" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
-                    <MudTextField Label="Имя" @bind-Value="patient.FirstName" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
-                    <MudTextField HelperText="При наличии" Label="Отчество" @bind-Value="patient.Patronymic}" Required="false" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
-                    <MudTextField @bind-Value="patient.DateOfBirth" InputType="InputType.Date" Format="yyyy-MM-dd" Label="Дата рождения" Required="true" RequiredError="@ERROR_REQUIRED" T="DateTime"></MudTextField>
-                    <MudTextField @bind-Value="patient.Passport" T="string" Label="Серия и номер паспорта" Mask="@(new PatternMask("0000 000000"))" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
-                    <GenreControl @bind-Value="patient.GenreId"></GenreControl>
-                    <MudText>@FileName</MudText>
-                    <MudImage Src="@ImageSource" Style="width: 150px; height: 150px"></MudImage>
                     <MudButton hidden="@visibleDeletePhotoButton" @onclick="DeletePhoto">Удалить фото</MudButton>
                 </MudItem>
                 <MudItem xs="6">
@@ -97,18 +95,6 @@
 
 
     IBrowserFile photoPatient;
-    string fileName;
-    string _defaultFileName = "Фото не загружено";
-    public string FileName
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(fileName))
-                return _defaultFileName;
-            else return fileName;
-        }
-        set => fileName = value;
-    }
 
     MudText TitleContent;
     public enum TypeOperation
@@ -123,7 +109,7 @@
     private string titleContentString = "Управление пациентом";
     private string titleButonContent = "Добавить";
     MudButton buttonAdd;
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         if (PatientId == 0)
         {
@@ -134,7 +120,8 @@
         {
             titleContentString = "Редактирование существующего пациента";
             titleButonContent = "Редактировать";
-            LoadData();
+            await LoadData();
+            await LoadPhoto();
         }
         StateHasChanged();
     }
@@ -143,7 +130,7 @@
 
     const long PHOTO_SIZE = 10 * 1024 * 1024;
     string ImageSource;
-    bool visibleDeletePhotoButton => FileName == _defaultFileName ? true : false;
+    bool visibleDeletePhotoButton => patient.Photo != null ? true : false;
 
     private async Task UploadFile(IBrowserFile file)
     {
@@ -153,13 +140,17 @@
         await stream.CopyToAsync(memoryStream);
         byte[] photoBytes = memoryStream.ToArray();
         patient.Photo = photoBytes;
-        FileName = file.Name;
         ImageSource = photoService.GetBase64Photo(photoBytes);
         stream.Close();
         memoryStream.Close();
     }
 
-    private async void LoadData()
+    private async Task LoadPhoto()
+    {
+        ImageSource = photoService.GetBase64Photo(patient.Photo);
+    }
+
+    private async Task LoadData()
     {
         patient = await PatientApiService.Get(PatientId);
         medCard = await MedCardApiService.GetByPatient(PatientId);
@@ -172,7 +163,6 @@
     {
         photoPatient = null;
         patient.Photo = null;
-        FileName = string.Empty;
         ImageSource = string.Empty;
         string name = "df";
     }
@@ -223,7 +213,6 @@
         if (!valid)
         {
             await this.MudForm.Validate();
-            hiddenGlobalErrorText = false;
             return;
         }
         Domain.DTOModels.Patient.PatientDTORequest patientDTORequest = new()
@@ -244,6 +233,7 @@
             };
         await PatientApiService.Update(PatientId, patientDTORequest);
         SbService.Add("Данные о пациенте изменены", Severity.Success);
+        MudDialogInstance.Close();
 
 
     }

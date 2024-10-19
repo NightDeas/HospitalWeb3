@@ -65,6 +65,7 @@ namespace DataBase
         public DbSet<MedCard> MedCards { get; set; }
         public DbSet<InsurancePolicy> InsurancePolicies { get; set; }
         public DbSet<Genre> Genres { get; set; }
+        public DbSet<Hospitalization> Hospitalizations { get; set; }
 
     }
 }
