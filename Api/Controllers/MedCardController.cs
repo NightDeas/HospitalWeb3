@@ -64,10 +64,5 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("patient/DEDED")]
-        public Task<IActionResult> GetBLABLABLA()
-        {
-
-        }
     }
 }

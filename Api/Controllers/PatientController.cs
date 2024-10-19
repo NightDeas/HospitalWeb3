@@ -1,5 +1,8 @@
 ﻿using Api.Controllers.Interfaces;
 using DataBase.Entities;
+
+using Domain.DTOModels.Insurance;
+using Domain.DTOModels.MedCard;
 using Domain.DTOModels.Patient;
 using Domain.Services;
 using Microsoft.AspNetCore.Http;
@@ -55,10 +58,25 @@ namespace Api.Controllers
             });
             return Ok(result);
         }
-        [HttpPut]
+        [HttpPut("{id}/{entity}")]
         public async Task<IActionResult> Update(int id, PatientDTORequest entity)
         {
             await PatientService.Update(id, entity);
+            InsurancePolicyDTORequest insuranceDTO = new()
+            {
+                End = entity.InsuranceEnd,
+                Number = entity.InsuranceNumber,
+            };
+            int insuranceId = (await InsurancePolicyService.GetByPatient(entity.Id)).Id;
+            await InsurancePolicyService.Update(insuranceId, insuranceDTO);
+
+            MedCardDTORequestUpdateTime medCardDTO = new()
+            {
+                Updated = DateTime.Now
+            };
+            int medCardId = (await MedCardService.GetByPatient(entity.Id)).Id;
+            await MedCardService.Update(medCardId, medCardDTO);
+
             return Ok();
         }
         [HttpDelete]

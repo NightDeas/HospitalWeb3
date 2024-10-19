@@ -10,7 +10,7 @@ namespace Domain.DTOModels.Insurance
     public class InsurancePolicyDTOResponse : DefaultEntity, Interfaces.IModelSingleConvert<InsurancePolicyDTOResponse, InsurancePolicy>
     {
         public string Number { get; set; }
-        public DateTime End { get; set; }
+        public DateTime End { get; set; } = DateTime.Now;
         public int PatientId { get; set; }
 
         public InsurancePolicy ConvertToDAL(InsurancePolicyDTOResponse model)

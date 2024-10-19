@@ -11,6 +11,7 @@ namespace Domain.DTOModels.Patient
 {
     public class PatientDTORequest : Interfaces.IModelSingleConvert<PatientDTORequest, DataBase.Entities.Patient>
     {
+        public int Id { get; set; }
         public string LastName { get; set; }
         public string FirstName { get; set; }
         public string? Patronymic { get; set; }
@@ -29,6 +30,7 @@ namespace Domain.DTOModels.Patient
         {
             var DALModel = new DataBase.Entities.Patient()
             {
+                Id = model.Id,
                 DateOfBirth = model.DateOfBirth,
                 Passport = model.Passport,
                 Address = model.Address,
@@ -48,6 +50,7 @@ namespace Domain.DTOModels.Patient
         {
             var DTOModel = new PatientDTORequest()
             {
+                Id = model.Id,
                 DateOfBirth = model.DateOfBirth,
                 Passport = model.Passport,
                 Address = model.Address,

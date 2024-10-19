@@ -13,7 +13,7 @@ namespace Domain.DTOModels.Patient
         public string FirstName { get; set; }
         public string? Patronymic { get; set; }
 
-        public DateTime DateOfBirth { get; set; }
+        public DateTime DateOfBirth { get; set; } = DateTime.Now;
         public string Passport { get; set; }
         public string Address { get; set; }
         public string? WorkAddress { get; set; }

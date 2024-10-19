@@ -1,4 +1,5 @@
 ﻿@page "/patientAdd"
+@using DataBase.Enums
 @using DataBase.Models
 @using DataBase.Operations
 @using DataBase.Entities
@@ -20,6 +21,7 @@
     <DialogContent>
         <MudForm @ref="MudForm" @bind-IsValid="valid">
             <MudGrid>
+                @* НАДО ПРИ ЗАГРУЗКЕ СТРАНИЦЫ РЕДАКТИРОВАНИЯ ЗАГРУЖАТЬ ФОТО *@
                 <MudItem xs="6">
                     <MudText Typo="Typo.h5" Color="Color.Primary">Основная информация</MudText>
                     <MudText Typo="Typo.h5" Color="Color.Primary">Фотография пациента</MudText>
@@ -33,7 +35,7 @@
                     </MudFileUpload>
                     <MudTextField Label="Фамилия" @bind-Value="patient.LastName" Variant="MudBlazor.Variant.Text" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
                     <MudTextField Label="Имя" @bind-Value="patient.FirstName" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
-                    <MudTextField HelperText="При наличии" Label="Отчество" Required="false" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
+                    <MudTextField HelperText="При наличии" Label="Отчество" @bind-Value="patient.Patronymic}" Required="false" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
                     <MudTextField @bind-Value="patient.DateOfBirth" InputType="InputType.Date" Format="yyyy-MM-dd" Label="Дата рождения" Required="true" RequiredError="@ERROR_REQUIRED" T="DateTime"></MudTextField>
                     <MudTextField @bind-Value="patient.Passport" T="string" Label="Серия и номер паспорта" Mask="@(new PatternMask("0000 000000"))" Required="true" RequiredError="@ERROR_REQUIRED"></MudTextField>
                     <GenreControl @bind-Value="patient.GenreId"></GenreControl>
@@ -68,7 +70,7 @@
         </MudForm>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Primary" OnClick="CreatePatient">Добавить</MudButton>
+        <MudButton Color="Color.Primary" OnClick="ButtonAdd_Click">@titleButonContent</MudButton>
         <MudButton Color="Color.Error" OnClick="Cancel">Отмена</MudButton>
     </DialogActions>
 </MudDialog>
@@ -119,20 +121,25 @@
     public int PatientId { get; set; }
 
     private string titleContentString = "Управление пациентом";
+    private string titleButonContent = "Добавить";
+    MudButton buttonAdd;
     protected override void OnInitialized()
     {
         if (PatientId == 0)
+        {
             titleContentString = "Регистрация нового пациента";
+            titleButonContent = "Добавить";
+        }
         else
         {
             titleContentString = "Редактирование существующего пациента";
+            titleButonContent = "Редактировать";
             LoadData();
-            // StateHasChanged();
         }
         StateHasChanged();
     }
 }
-@code{
+@code {
 
     const long PHOTO_SIZE = 10 * 1024 * 1024;
     string ImageSource;
@@ -172,26 +179,71 @@
 
     async void CloseDialog() => await MudDialog.CloseAsync();
 
-    async void CreatePatient()
+    private async Task ButtonAdd_Click()
     {
-        // if (!valid)
-        // {
-        //     await this.MudForm.Validate();
-        //     hiddenGlobalErrorText = false;
-        //     return;
-        // }
-        // int tempId = await PatientServ.AddAsync(patient);
-        // if (tempId == 0)
-        //     throw new();
-        // medCard.PatientId = tempId;
-        // insurancePolicy.PatientId = tempId;
-        // tempId = await medCardServ.AddAsync(medCard);
-        // if (tempId == 0)
-        //     throw new();
-        // tempId = await InsurancePolicyServ.AddAsync(insurancePolicy);
-        // if (tempId == 0)
-        //     throw new();
-        // SbService.Add("Пациент добавлен в базу", Severity.Success);
+        if (patient.Id == 0)
+            await CreatePatient();
+        else
+            await EditPatient();
+    }
+
+    async Task CreatePatient()
+    {
+        if (!valid)
+        {
+            await this.MudForm.Validate();
+            hiddenGlobalErrorText = false;
+            return;
+        }
+        Domain.DTOModels.Patient.PatientDTORequest patientDTORequest = new()
+            {
+                Address = patient.Address,
+                FirstName = patient.FirstName,
+                DateOfBirth = patient.DateOfBirth,
+                Email = patient.Email,
+                GenreId = (Genres)patient.GenreId,
+                InsuranceEnd = insurancePolicy.End,
+                InsuranceNumber = insurancePolicy.Number,
+                LastName = patient.LastName,
+                Passport = patient.Passport,
+                Patronymic = patient.Patronymic,
+                Photo = patient.Photo,
+                Telephone = patient.Telephone,
+                WorkAddress = patient.WorkAddress
+            };
+        int tempId = await PatientApiService.Add(patientDTORequest);
+        if (tempId == 0)
+            throw new();
+        SbService.Add("Пациент добавлен в базу", Severity.Success);
+
+
+    }
+    async Task EditPatient()
+    {
+        if (!valid)
+        {
+            await this.MudForm.Validate();
+            hiddenGlobalErrorText = false;
+            return;
+        }
+        Domain.DTOModels.Patient.PatientDTORequest patientDTORequest = new()
+            {
+                Address = patient.Address,
+                FirstName = patient.FirstName,
+                DateOfBirth = patient.DateOfBirth,
+                Email = patient.Email,
+                GenreId = (Genres)patient.GenreId,
+                InsuranceEnd = insurancePolicy.End,
+                InsuranceNumber = insurancePolicy.Number,
+                LastName = patient.LastName,
+                Passport = patient.Passport,
+                Patronymic = patient.Patronymic,
+                Photo = patient.Photo,
+                Telephone = patient.Telephone,
+                WorkAddress = patient.WorkAddress
+            };
+        await PatientApiService.Update(PatientId, patientDTORequest);
+        SbService.Add("Данные о пациенте изменены", Severity.Success);
 
 
     }

@@ -1,4 +1,6 @@
-﻿using Domain.DTOModels.Patient;
+﻿using DataBase.Entities;
+
+using Domain.DTOModels.Patient;
 using System.Reflection.Metadata;
 
 namespace HospitalWeb.Components.Services.Api
@@ -27,6 +29,18 @@ namespace HospitalWeb.Components.Services.Api
         {
             var responses = await HttpClient.GetFromJsonAsync<PatientDTOResponse>($"/api/Patient/get/{patientId}");
             return responses;
+        }
+
+        public async Task<int> Add(PatientDTORequest patient)
+        {
+            var responses = await HttpClient.PostAsJsonAsync<PatientDTORequest>($"/api/Patient", patient);
+            int result = int.Parse(await responses.Content.ReadAsStringAsync());
+            return result;
+        }
+
+        public async Task Update(int id, PatientDTORequest patient)
+        {
+            var responses = await HttpClient.PutAsJsonAsync<PatientDTORequest>($"/api/Patient/{id}/{patient}", patient);
         }
     }
 }
