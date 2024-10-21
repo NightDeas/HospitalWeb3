@@ -19,7 +19,7 @@
         <MudText Color="Color.Tertiary" Typo="Typo.h3">@titleContentString</MudText>
     </TitleContent>
     <DialogContent>
-        <MudForm @ref="MudForm" @bind-IsValid="valid">
+        <MudForm @ref="@MudForm" @bind-IsValid="valid">
             <MudGrid>
                 <MudItem xs="6">
                     <MudText Typo="Typo.h5" Color="Color.Primary">Основная информация</MudText>
@@ -39,13 +39,13 @@
                             </MudButton>
                         </ActivatorContent>
                     </MudFileUpload>
-                    <MudButton hidden="@visibleDeletePhotoButton" @onclick="DeletePhoto">Удалить фото</MudButton>
+                    <MudButton hidden="@(!visibleDeletePhotoButton)" @onclick="DeletePhoto">Удалить фото</MudButton>
                 </MudItem>
                 <MudItem xs="6">
                     <MudStack>
                         <MudItem>
                             <MudText Typo="Typo.h5" Color="Color.Primary">Страховой полис</MudText>
-                            <MudTextField @bind-Value="insurancePolicy.Number" Mask="@(new PatternMask("0000000000000000"))" HelperText="Страховой полис состоит из 16 цифр" MaxLength="16" Label="Номер страхового полиса" Required="true" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
+                            <MudTextField @bind-Value="insurancePolicy.Number" Mask="@(new PatternMask("0000000000000000"))" HelperText="Страховой полис состоит из 16 цифр" For="()=> insurancePolicy.Number" Label="Номер страхового полиса" Required="true" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
                             <MudTextField @bind-Value="insurancePolicy.End" Format="yyyy-MM-dd" InputType="InputType.Date" Label="Дата окончания страхового полиса" Required="true" RequiredError="@ERROR_REQUIRED" T="DateTime"></MudTextField>
                         </MudItem>
                         <MudItem>
@@ -131,7 +131,8 @@
     const long PHOTO_SIZE = 10 * 1024 * 1024;
     string ImageSource;
     bool visibleDeletePhotoButton => patient.Photo != null ? true : false;
-
+    //TODO: Повторная загрузка фото не работает
+    //TODO: Валидация работает криво, при успешной валидации всё равно не пропускает, только со второго клика(попробовать убрать valid???)
     private async Task UploadFile(IBrowserFile file)
     {
         this.photoPatient = file;
@@ -147,6 +148,8 @@
 
     private async Task LoadPhoto()
     {
+        if (patient.Photo == null)
+            return;
         ImageSource = photoService.GetBase64Photo(patient.Photo);
     }
 
@@ -162,7 +165,7 @@
     private async void DeletePhoto()
     {
         photoPatient = null;
-        patient.Photo = null;
+        patient.Photo = new byte[0];
         ImageSource = string.Empty;
         string name = "df";
     }
@@ -217,6 +220,7 @@
         }
         Domain.DTOModels.Patient.PatientDTORequest patientDTORequest = new()
             {
+                Id = patient.Id,
                 Address = patient.Address,
                 FirstName = patient.FirstName,
                 DateOfBirth = patient.DateOfBirth,

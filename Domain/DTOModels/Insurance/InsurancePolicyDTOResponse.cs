@@ -1,6 +1,7 @@
 ﻿using DataBase.Entities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace Domain.DTOModels.Insurance
 {
     public class InsurancePolicyDTOResponse : DefaultEntity, Interfaces.IModelSingleConvert<InsurancePolicyDTOResponse, InsurancePolicy>
     {
+        [Length(16,16, ErrorMessage = "Номер полиса состоит из 16 цифр")]
         public string Number { get; set; }
         public DateTime End { get; set; } = DateTime.Now;
         public int PatientId { get; set; }

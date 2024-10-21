@@ -1,5 +1,6 @@
 ﻿using DataBase.Entities;
 using DataBase.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,29 +11,52 @@ namespace DataBase.Repositories
 {
     public class HospitalizationRepository : IDefaultRepository<Hospitalization>
     {
-        public Task<bool> AnyAsync(int id)
+        Context Context { get; set; }
+
+        public HospitalizationRepository(Context context)
         {
-            throw new NotImplementedException();
+            Context = context;
         }
 
-        public Task Delete(int id)
+        public async Task<bool> AnyAsync(int id)
         {
-            throw new NotImplementedException();
+            return await Context.Hospitalizations.AnyAsync(x => x.Id == id);
         }
 
-        public Task<Hospitalization> Get(int id)
+        public async Task Delete(int id)
         {
-            throw new NotImplementedException();
+            var hosp = Get(id);
+            Context.Remove(hosp);
+            await Context.SaveChangesAsync();
         }
 
-        public Task<int> Post(Hospitalization entity)
+        public async Task<Hospitalization> Get(int id)
         {
-            throw new NotImplementedException();
+            var hosp = await Context.Hospitalizations.FirstAsync(x => x.Id == id);
+            return hosp;
         }
 
-        public Task Update(int id, Hospitalization entity)
+        public async Task<int> Post(Hospitalization entity)
         {
-            throw new NotImplementedException();
+            await Context.Hospitalizations.AddAsync(entity);
+            await Context.SaveChangesAsync();
+            return entity.Id;
+        }
+
+        public async Task Update(int id, Hospitalization entity)
+        {
+            var hosp = await Get(id);
+
+            hosp.ReasonRejection = entity.ReasonRejection;
+            hosp.IsRejection = entity.IsRejection;
+            hosp.PatientId = entity.PatientId;
+            hosp.Code = entity.Code;
+            hosp.Date = entity.Date;
+            hosp.IsCancel = entity.IsCancel;
+            hosp.Create = entity.Create;
+
+            await Context.SaveChangesAsync();
+
         }
     }
 }

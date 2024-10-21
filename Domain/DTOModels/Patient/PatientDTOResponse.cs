@@ -1,4 +1,5 @@
 ﻿using DataBase.Entities;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,6 +18,7 @@ namespace Domain.DTOModels.Patient
         public string Passport { get; set; }
         public string Address { get; set; }
         public string? WorkAddress { get; set; }
+        [RegularExpression("^[\\+]?[(]?[0-9]{3}[)]?[-\\s\\.]?[0-9]{3}[-\\s\\.]?[0-9]{4,6}$", ErrorMessage = "Неверный формат телефона")]
         public string? Telephone { get; set; }
         public byte[]? Photo { get; set; }
         public string? Email { get; set; }

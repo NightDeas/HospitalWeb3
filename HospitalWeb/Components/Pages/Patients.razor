@@ -18,6 +18,9 @@
 @using MudBlazorFix;
 @using static HospitalWeb.Components.Dialogs.PatientAdd
 <MudGrid Spacing="6">
+    <MudItem xs="12">
+        <MudText Style="margin-left: 20px" Color="Color.Tertiary" Typo="Typo.h3">Управление пациентами</MudText>
+    </MudItem>
     <MudItem xs="3">
         <MudStack>
             <MudText class="pa-4 m-16" Align="Align.Center" Color="Color.Primary" Typo="Typo.h5">Настройки</MudText>
@@ -80,10 +83,11 @@
         </MudStack>
     </MudItem>
     <MudItem xs="8">
-        <MudPaper class="pa-5 ma-2" style="height: 80vh" Outlined="true">
+        <MudPaper class="pa-5 ma-2" style="height: 75vh" Outlined="true">
             <RadzenText>Поиск</RadzenText>
             <RadzenTextBox @bind-Value="SearchText" Style="width: 50vh"></RadzenTextBox>
-            <MudDataGrid ReadOnly="false" Items="@patients">
+            <MudDataGrid Style="display: flex; flex-direction: column; height: 90%;"
+                         ReadOnly="false" Items="@patients">
                 <Columns>
                     <PropertyColumn Property="x => x.FullName" Title="ФИО" />
                     <PropertyColumn Property="x => x.DateOfBirth" Format="dd.MM.yyyy" Hidden="@(!_columnVisibility[Keys.dateOfBirthColumnVisible])" Title="Дата рождения" />
@@ -105,9 +109,9 @@
             </MudDataGrid>
         </MudPaper>
     </MudItem>
-    <MudItem xs="12" Style="height: 10vh">
+    <MudItem xs="12" Style="height: 15vh">
         <MudGrid Justify="Justify.Center">
-            <MudButton OnClick="() => OpenDialogPatient(0)" Color="Color.Primary">Добавить</MudButton>
+            <MudButton Style="font-size:22px" OnClick="() => OpenDialogPatient(0)" Color="Color.Primary">Добавить</MudButton>
         </MudGrid>
     </MudItem>
 </MudGrid>
