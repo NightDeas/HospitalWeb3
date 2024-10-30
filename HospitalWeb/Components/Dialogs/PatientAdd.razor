@@ -131,8 +131,8 @@
     const long PHOTO_SIZE = 10 * 1024 * 1024;
     string ImageSource;
     bool visibleDeletePhotoButton => patient.Photo != null ? true : false;
+
     //TODO: Повторная загрузка фото не работает
-    //TODO: Валидация работает криво, при успешной валидации всё равно не пропускает, только со второго клика(попробовать убрать valid???)
     private async Task UploadFile(IBrowserFile file)
     {
         this.photoPatient = file;
@@ -182,9 +182,9 @@
 
     async Task CreatePatient()
     {
+        await this.MudForm.Validate();
         if (!valid)
         {
-            await this.MudForm.Validate();
             hiddenGlobalErrorText = false;
             return;
         }
