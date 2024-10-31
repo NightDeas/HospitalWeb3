@@ -8,7 +8,7 @@ namespace HospitalWeb.Components.Services.Api
         {
             HttpClient client = new HttpClient();
             client.BaseAddress = new Uri("https://localhost:7236");
-            client.Timeout = new TimeSpan(0, 0, 5);
+            client.Timeout = new TimeSpan(0, 0, 15);
             return client;
         }
     }

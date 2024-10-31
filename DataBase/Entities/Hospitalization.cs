@@ -21,5 +21,7 @@ namespace DataBase.Entities
         public DateTime Date { get; set; }
         public DateTime Create { get; set; }
 
+        public virtual Patient Patient { get; set; }
+
     }
 }

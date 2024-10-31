@@ -1,6 +1,7 @@
 ﻿using DataBase.Entities;
 using DataBase.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,6 +58,27 @@ namespace DataBase.Repositories
 
             await Context.SaveChangesAsync();
 
+        }
+        public async Task<List<Hospitalization>> GetTableData(string? parametr)
+        {
+            List<Hospitalization> data = new();
+            if (parametr.IsNullOrEmpty())
+            {
+                data = await Context.Hospitalizations
+                .Include(x => x.Patient)
+                .AsNoTracking()
+                .ToListAsync();
+                return data;
+            }
+            data = await Context.Hospitalizations
+                .Include(x => x.Patient)
+                .Where(x =>
+                x.Date.ToString().Contains(parametr) ||
+                x.Code.ToString().Contains(parametr) ||
+                x.Create.ToString().Contains(parametr) ||
+                x.ReasonRejection.ToString().Contains(parametr))
+                .AsNoTracking().ToListAsync();
+            return data;
         }
     }
 }

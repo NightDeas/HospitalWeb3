@@ -1,6 +1,9 @@
-﻿using DataBase.Repositories;
+﻿using DataBase.Entities;
+using DataBase.Repositories;
 using Domain.DTOModels.Hospitalization;
 using Domain.Services.Interfaces;
+using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +14,7 @@ namespace Domain.Services
 {
     public class HospitalizationService : IDefaultService<HospitalizationDTORequest, HospitalizationDTOResponse>
     {
-        HospitalizationRepository Repository;
+        HospitalizationRepository Repository { get; set; }
 
         public HospitalizationService(HospitalizationRepository repository)
         {
@@ -41,6 +44,13 @@ namespace Domain.Services
         public Task Update(int id, HospitalizationDTORequest entity)
         {
             return Repository.Update(id, entity.ConvertToDAL(entity));
+        }
+
+        public async Task<List<DTOModels.Hospitalization.HospitalizationDTOResponseTable>> GetTableData(string? parametr)
+        {
+            var data = await Repository.GetTableData(parametr);
+            var result = data.Select(x => new HospitalizationDTOResponseTable().ConvertToDTO(x.Patient, x)).ToList();
+            return result;
         }
     }
 }

@@ -1,17 +1,95 @@
 ﻿@page "/Hospitalization"
+@inject Services.Api.HospitalizationApiService HospitalizationApi;
+@inject ISnackbar SnackBar;
+@using Keys = Services.CookiesService.Keys;
+@inject Services.CookiesService CookieService;
 <MudGrid Spacing="6">
-	<MudItem xs="12">
-		<MudText Style="margin-left:20px" Color="Color.Tertiary" Typo="Typo.h3">Госпитализация пациента</MudText>
-	</MudItem>
-	<MudItem xs="3">
-		<MudStack>
-			<MudText>Настройки</MudText>
-		</MudStack>
-	</MudItem>
-	<MudItem xs="9">
-		
-	</MudItem>
+    <MudItem xs="12">
+        <MudText Style="margin-left:20px" Color="Color.Tertiary" Typo="Typo.h3">Госпитализация пациента</MudText>
+    </MudItem>
+    <MudItem xs="3">
+        <MudStack>
+            <MudText Color="Color.Primary" Typo="Typo.h5" Align="Align.Center">Настройки</MudText>
+            <MudStack>
+                <MudCheckBox @bind-Value="this[Keys.hospCancel]">Отказ пациента</MudCheckBox>
+                <MudCheckBox @bind-Value="this[Keys.hospRejection]">Отказ врачом</MudCheckBox>
+                <MudCheckBox @bind-Value="this[Keys.hospReason]">Причина</MudCheckBox>
+            </MudStack>
+        </MudStack>
+    </MudItem>
+    <MudItem xs="8">
+        <MudPaper Class="pa-4" Height="75vh">
+            <MudDataGrid Items="@_dataTable">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Periodic Elements</MudText>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <Columns>
+                    <SelectColumn T="Domain.DTOModels.Hospitalization.HospitalizationDTOResponseTable" />
+                    <PropertyColumn Property="x => x.PatientFullName" Title="ФИО пациента" Sortable="false" Filterable="false" />
+                    <PropertyColumn Property="x => x.Date" Title="Дата" />
+                    <TemplateColumn Hidden="@(!_columnVisible[Keys.hospCancel])" T="Domain.DTOModels.Hospitalization.HospitalizationDTOResponseTable" Title="Отказ пациентом">
+                        <CellTemplate>
+                            @ConvertBool(context.Item.IsCancel)
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn Hidden="@(!_columnVisible[Keys.hospRejection])" T="Domain.DTOModels.Hospitalization.HospitalizationDTOResponseTable" Title="Отказ врачом">
+                        <CellTemplate>
+                            @ConvertBool(context.Item.IsRejection)
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <PropertyColumn Hidden="@(!_columnVisible[Keys.hospReason])" Property="x => x.ReasonRejection" Title="Причина отказа" />
+                </Columns>
+                <PagerContent>
+                    @* <MudDataGridPager T="Element" /> *@
+                </PagerContent>
+            </MudDataGrid>
+        </MudPaper>
+    </MudItem>
 </MudGrid>
 @code {
+    string _searchString;
+    List<Domain.DTOModels.Hospitalization.HospitalizationDTOResponseTable> _dataTable = new();
 
+    Dictionary<Services.CookiesService.Keys, bool> _columnVisible = new()
+        {
+            [Keys.hospCancel] = true,
+            [Keys.hospRejection] = true,
+            [Keys.hospReason] = true,
+        };
+
+    public bool this[Keys key]
+    {
+        get => _columnVisible[key];
+        set
+        {
+            _columnVisible[key] = value;
+            CookieService.SaveParametrInCookie(key, value);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Task.Run(AutoUpdateData);
+        _columnVisible = await CookieService.LoadCookieVisibleColumn(_columnVisible);
+    }
+
+    private async Task AutoUpdateData()
+    {
+        while (true)
+        {
+            _dataTable = await HospitalizationApi.GetTableDatasAsync(_searchString);
+            SnackBar.Add("Таблица обновлена");
+            await InvokeAsync(() => StateHasChanged());
+            await Task.Delay(3000);
+        }
+    }
+
+    private string ConvertBool(bool value)
+    {
+        if (value) return "Да";
+        else return "Нет";
+    }
 }

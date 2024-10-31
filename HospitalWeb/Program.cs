@@ -9,7 +9,11 @@ using MudBlazor;
 using HospitalWeb.Components.Services;
 using HospitalWeb.Components.Interfaces;
 using HospitalWeb.Components.Services.Api;
-
+using DataBase.Repositories.Interfaces;
+using Domain.Services;
+using Api.Controllers.Interfaces;
+using Domain.DTOModels.Hospitalization;
+using Api.Controllers;
 
 namespace HospitalWeb
 {
@@ -31,7 +35,7 @@ namespace HospitalWeb
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("spek"));
             });
-            builder.Services.AddScoped<Context>();
+            //builder.Services.AddScoped<Context>();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<HttpContextAccessor>();
             builder.Services.AddScoped<CookiesService>();
@@ -45,10 +49,13 @@ namespace HospitalWeb
             builder.Services.AddScoped<IPhotoService, PhotoService>();
 
 
+            
+
             builder.Services.AddHttpClient();
             builder.Services.AddScoped<PatientApiService>();
             builder.Services.AddScoped<MedCardApiService>();
             builder.Services.AddScoped<InsurancePolicyApiService>();
+            builder.Services.AddScoped<HospitalizationApiService>();
 
             //builder.Services.AddSingleton<HospitalWeb.Components.Services.Notification.NotificationService>();
             var app = builder.Build();

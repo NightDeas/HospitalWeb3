@@ -21,18 +21,21 @@ namespace HospitalWeb.Components.Services
             /// <summary>
             /// Отвечают за отображение колонок в Patients.razor
             /// </summary>
-            dateOfBirthColumnVisible,
-            telephoneColumnVisible,
-            mailColumnVisible,
-            passportColumnVisible,
-            adressColumnVisible,
-            workAdressColumnVisible,
-            genreColumnVisible,
-            insuranceNumberVisible,
-            insuranceEndVisible,
-            medCardCreateVisible,
+            patDateOfBirthColumnVisible,
+            patTelephoneColumnVisible,
+            patMailColumnVisible,
+            patPassportColumnVisible,
+            patAdressColumnVisible,
+            patWorkAdressColumnVisible,
+            patGenreColumnVisible,
+            patInsuranceNumberVisible,
+            patInsuranceEndVisible,
+            patMedCardCreateVisible,
+            hospReason,
+            hospRejection,
+            hospCancel,
         }
-        public async void SetCookie(Keys key, string value, int Days = 1)
+        private async void SetCookie(Keys key, string value, int Days = 1)
         {
             await jsRuntime.InvokeVoidAsync("setCookie", key.ToString(), value, Days);
         }
@@ -45,7 +48,22 @@ namespace HospitalWeb.Components.Services
         public async Task<string> GetCookie(Keys keys)
         {
             return await jsRuntime.InvokeAsync<string>("getCookie", keys.ToString());
-            
+
+        }
+        public void SaveParametrInCookie(Services.CookiesService.Keys keys, bool parametr, int Days = 31)
+        {
+            string parametrInCookie = parametr ? "1" : "0";
+            SetCookie(keys, parametrInCookie, Days);
+        }
+
+        public async Task<Dictionary<Keys, bool>> LoadCookieVisibleColumn(Dictionary<Keys, bool> _columnVisibility)
+        {
+            Dictionary<Keys, bool> dictionary = new();
+            foreach (var column in _columnVisibility.Keys)
+            {
+                dictionary.Add(column, await GetCookie(column) == "0" ? false : true);
+            }
+            return dictionary;
         }
 
     }

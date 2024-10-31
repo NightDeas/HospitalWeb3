@@ -44,6 +44,12 @@ namespace DataBase
                 .HasForeignKey(x => x.GenreId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Hospitalization>()
+                .HasOne(x => x.Patient)
+                .WithMany(x => x.Hospitalizations)
+                .HasForeignKey(x => x.PatientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             
 
             modelBuilder.Entity<Genre>().HasData(new List<Genre>()

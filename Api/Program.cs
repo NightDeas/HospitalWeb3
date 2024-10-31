@@ -1,7 +1,10 @@
 
 using Api.Controllers;
+using Api.Controllers.Interfaces;
 using DataBase.Entities;
 using DataBase.Repositories;
+using DataBase.Repositories.Interfaces;
+using Domain.DTOModels.Hospitalization;
 using Domain.DTOModels.Insurance;
 using Domain.DTOModels.MedCard;
 using Domain.DTOModels.Patient;
@@ -45,6 +48,16 @@ namespace Api
             builder.Services.AddScoped<Domain.Services.Interfaces.IDefaultService<PatientDTORequest, PatientDTOResponse>, PatientService>();
             builder.Services.AddScoped<Domain.Services.Interfaces.IPatientService, PatientService>();
             builder.Services.AddScoped<PatientService>();
+
+
+            builder.Services.AddScoped<IDefaultRepository<Hospitalization>, DataBase.Repositories.HospitalizationRepository>();
+            builder.Services.AddScoped<DataBase.Repositories.HospitalizationRepository>();
+            builder.Services.AddScoped<Domain.Services.Interfaces.IDefaultService<Domain.DTOModels.Hospitalization.HospitalizationDTORequest, Domain.DTOModels.Hospitalization.HospitalizationDTOResponse>,
+                Domain.Services.HospitalizationService>();
+            builder.Services.AddScoped<Domain.Services.HospitalizationService>();
+            builder.Services.AddScoped<IDefaultController<HospitalizationDTORequest>, HospitalizationController>();
+            builder.Services.AddScoped<HospitalizationController>();
+
 
             //builder.Services.AddScoped<Controllers.Interfaces.IDefaultController<PatientDTORequest>, PatientController>();
 

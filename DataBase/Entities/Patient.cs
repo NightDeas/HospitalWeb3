@@ -34,5 +34,7 @@ namespace DataBase.Entities
         public virtual Genre Genre { get; set; }
         public virtual InsurancePolicy InsurancePolicy{ get;set;} 
         public virtual MedCard MedCard{ get; set; }
+
+        public virtual ICollection<Hospitalization> Hospitalizations { get; set; }
     }
 }

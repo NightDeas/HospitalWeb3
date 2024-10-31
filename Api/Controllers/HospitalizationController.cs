@@ -56,5 +56,12 @@ namespace Api.Controllers
             var result = await Service.Post(entity);
             return Ok(result);
         }
+        [HttpGet("tables/get/")]
+        public async Task<IActionResult> GetTableData([FromQuery]string? parametr)
+        {
+            var result = await Service.GetTableData(parametr);
+            return Ok(result);
+        }
+
     }
 }

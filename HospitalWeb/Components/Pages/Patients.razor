@@ -29,52 +29,52 @@
                     <MudTreeView CheckBoxColor="Color.Info" Text="Отображение полей">
                         <MudTreeViewItem>
                             <Content>
-                                <MudCheckBox @bind-Value="this[Keys.dateOfBirthColumnVisible]" Label="Дата рождения"></MudCheckBox>
+                                <MudCheckBox @bind-Value="this[Keys.patDateOfBirthColumnVisible]" Label="Дата рождения"></MudCheckBox>
                             </Content>
                         </MudTreeViewItem>
                         <MudTreeViewItem>
                             <Content>
-                                <MudCheckBox @bind-Value="@this[Keys.adressColumnVisible]" Label="Адрес"></MudCheckBox>
+                                <MudCheckBox @bind-Value="@this[Keys.patAdressColumnVisible]" Label="Адрес"></MudCheckBox>
                             </Content>
                         </MudTreeViewItem>
                         <MudTreeViewItem>
                             <Content>
-                                <MudCheckBox @bind-Value="this[Keys.workAdressColumnVisible]" Label="Рабочий адрес"></MudCheckBox>
+                                <MudCheckBox @bind-Value="this[Keys.patWorkAdressColumnVisible]" Label="Рабочий адрес"></MudCheckBox>
                             </Content>
                         </MudTreeViewItem>
                         <MudTreeViewItem>
                             <Content>
-                                <MudCheckBox @bind-Value="this[Keys.telephoneColumnVisible]" Label="Телефон" />
+                                <MudCheckBox @bind-Value="this[Keys.patTelephoneColumnVisible]" Label="Телефон" />
                             </Content>
                         </MudTreeViewItem>
                         <MudTreeViewItem>
                             <Content>
-                                <MudCheckBox @bind-Value="this[Keys.passportColumnVisible]" Label="Паспорт" />
+                                <MudCheckBox @bind-Value="this[Keys.patPassportColumnVisible]" Label="Паспорт" />
                             </Content>
                         </MudTreeViewItem>
                         <MudTreeViewItem>
                             <Content>
-                                <MudCheckBox @bind-Value="this[Keys.genreColumnVisible]" Label="Пол"></MudCheckBox>
+                                <MudCheckBox @bind-Value="this[Keys.patGenreColumnVisible]" Label="Пол"></MudCheckBox>
                             </Content>
                         </MudTreeViewItem>
                         <MudTreeViewItem>
                             <Content>
-                                <MudCheckBox @bind-Value="this[Keys.mailColumnVisible]" Label="Почта"></MudCheckBox>
+                                <MudCheckBox @bind-Value="this[Keys.patMailColumnVisible]" Label="Почта"></MudCheckBox>
                             </Content>
                         </MudTreeViewItem>
                         <MudTreeViewItem>
                             <Content>
-                                <MudCheckBox @bind-Value="this[Keys.insuranceNumberVisible]" Label="Номер полиса"></MudCheckBox>
+                                <MudCheckBox @bind-Value="this[Keys.patInsuranceNumberVisible]" Label="Номер полиса"></MudCheckBox>
                             </Content>
                         </MudTreeViewItem>
                         <MudTreeViewItem>
                             <Content>
-                                <MudCheckBox @bind-Value="this[Keys.insuranceEndVisible]" Label="Срок окончания полиса"></MudCheckBox>
+                                <MudCheckBox @bind-Value="this[Keys.patInsuranceEndVisible]" Label="Срок окончания полиса"></MudCheckBox>
                             </Content>
                         </MudTreeViewItem>
                         <MudTreeViewItem>
                             <Content>
-                                <MudCheckBox @bind-Value="this[Keys.medCardCreateVisible]" Label="Дата получения полиса"></MudCheckBox>
+                                <MudCheckBox @bind-Value="this[Keys.patMedCardCreateVisible]" Label="Дата получения полиса"></MudCheckBox>
                             </Content>
                         </MudTreeViewItem>
                     </MudTreeView>
@@ -90,16 +90,16 @@
                          ReadOnly="false" Items="@patients">
                 <Columns>
                     <PropertyColumn Property="x => x.FullName" Title="ФИО" />
-                    <PropertyColumn Property="x => x.DateOfBirth" Format="dd.MM.yyyy" Hidden="@(!_columnVisibility[Keys.dateOfBirthColumnVisible])" Title="Дата рождения" />
-                    <PropertyColumn Property="x => x.Address" Hidden="@(!_columnVisibility[Keys.adressColumnVisible])" Title="Адрес" />
-                    <PropertyColumn Property="x => x.WorkAddress" Hidden="@(!_columnVisibility[Keys.workAdressColumnVisible])" Title="Рабочий адрес" />
-                    <PropertyColumn Property="x => x.Telephone" Hidden="@(!_columnVisibility[Keys.telephoneColumnVisible])" Title="Телефон" />
-                    <PropertyColumn Property="x => x.Email" Hidden="@(!_columnVisibility[Keys.mailColumnVisible])" Title="Почта" />
-                    <PropertyColumn Property="x => x.Genre" Hidden="@(!_columnVisibility[Keys.genreColumnVisible])" Title="Пол" />
-                    <PropertyColumn Property="x => x.Passport" Hidden="@(!_columnVisibility[Keys.passportColumnVisible])" Title="Паспорт" />
-                    <PropertyColumn Property="x => x.InsuranceNumber" Hidden="@(!_columnVisibility[Keys.insuranceNumberVisible])" Title="Номер полиса" />
-                    <PropertyColumn Property="x => x.InsuranceDateEnd" Format="dd.MM.yyyy" Hidden="@(!_columnVisibility[Keys.insuranceEndVisible])" Title="Срок окончания полиса" />
-                    <PropertyColumn Property="x => x.MedCardCreated" Hidden="@(!_columnVisibility[Keys.medCardCreateVisible])" Format="dd.MM.yyyy" Title="Дата создания мед карты" />
+                    <PropertyColumn Property="x => x.DateOfBirth" Format="dd.MM.yyyy" Hidden="@(!_columnVisibility[Keys.patDateOfBirthColumnVisible])" Title="Дата рождения" />
+                    <PropertyColumn Property="x => x.Address" Hidden="@(!_columnVisibility[Keys.patAdressColumnVisible])" Title="Адрес" />
+                    <PropertyColumn Property="x => x.WorkAddress" Hidden="@(!_columnVisibility[Keys.patWorkAdressColumnVisible])" Title="Рабочий адрес" />
+                    <PropertyColumn Property="x => x.Telephone" Hidden="@(!_columnVisibility[Keys.patTelephoneColumnVisible])" Title="Телефон" />
+                    <PropertyColumn Property="x => x.Email" Hidden="@(!_columnVisibility[Keys.patMailColumnVisible])" Title="Почта" />
+                    <PropertyColumn Property="x => x.Genre" Hidden="@(!_columnVisibility[Keys.patGenreColumnVisible])" Title="Пол" />
+                    <PropertyColumn Property="x => x.Passport" Hidden="@(!_columnVisibility[Keys.patPassportColumnVisible])" Title="Паспорт" />
+                    <PropertyColumn Property="x => x.InsuranceNumber" Hidden="@(!_columnVisibility[Keys.patInsuranceNumberVisible])" Title="Номер полиса" />
+                    <PropertyColumn Property="x => x.InsuranceDateEnd" Format="dd.MM.yyyy" Hidden="@(!_columnVisibility[Keys.patInsuranceEndVisible])" Title="Срок окончания полиса" />
+                    <PropertyColumn Property="x => x.MedCardCreated" Hidden="@(!_columnVisibility[Keys.patMedCardCreateVisible])" Format="dd.MM.yyyy" Title="Дата создания мед карты" />
                     <TemplateColumn>
                         <CellTemplate>
                             <MudIconButton  Size="Size.Small" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => OpenDialogPatient(context.Item.Id))"></MudIconButton>
@@ -117,18 +117,18 @@
 </MudGrid>
 
 @code {
-    private readonly Dictionary<Keys, bool> _columnVisibility = new Dictionary<Keys, bool>
+    private Dictionary<Keys, bool> _columnVisibility = new Dictionary<Keys, bool>
     {
-        { Keys.dateOfBirthColumnVisible, true },
-        { Keys.telephoneColumnVisible, true },
-        { Keys.mailColumnVisible, false },
-        { Keys.passportColumnVisible, false },
-        { Keys.adressColumnVisible, true },
-        { Keys.workAdressColumnVisible, false },
-        { Keys.genreColumnVisible, false },
-        { Keys.insuranceNumberVisible, false },
-        { Keys.insuranceEndVisible, false },
-        { Keys.medCardCreateVisible, false }
+        { Keys.patDateOfBirthColumnVisible, true },
+        { Keys.patTelephoneColumnVisible, true },
+        { Keys.patMailColumnVisible, false },
+        { Keys.patPassportColumnVisible, false },
+        { Keys.patAdressColumnVisible, true },
+        { Keys.patWorkAdressColumnVisible, false },
+        { Keys.patGenreColumnVisible, false },
+        { Keys.patInsuranceNumberVisible, false },
+        { Keys.patInsuranceEndVisible, false },
+        { Keys.patMedCardCreateVisible, false }
     };
 
 
@@ -138,7 +138,7 @@
         get => _columnVisibility[key]; set
         {
             _columnVisibility[key] = value;
-            SaveParametrInCookie(key, value);
+            cookieService.SaveParametrInCookie(key, value);
         }
     }
 
@@ -161,25 +161,12 @@
                 searchText = value;
         }
     }
-
-    void SaveParametrInCookie(Services.CookiesService.Keys keys, bool parametr)
-    {
-        string parametrInCookie = parametr ? "1" : "0";
-        cookieService.SetCookie(keys, parametrInCookie, 31);
-    }
-    async Task LoadCookieVisibleColumn()
-    {
-        foreach (var column in _columnVisibility.Keys)
-        {
-            _columnVisibility[column] = await cookieService.GetCookie(column) == "0" ? false : true;
-        }
-
-    }
+   
 
     protected override async Task OnInitializedAsync()
     {
         Task.Run(AutoUpdateTable);
-        await LoadCookieVisibleColumn();
+        _columnVisibility = await cookieService.LoadCookieVisibleColumn(_columnVisibility);
     }
 
     private async Task AutoUpdateTable()
