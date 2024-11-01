@@ -58,7 +58,6 @@
                             <MudTextField @bind-Value="patient.Address" Lines="3" Label="Домашний адрес" Required="true" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
                             <MudTextField @bind-Value="patient.WorkAddress" Lines="3" Label="Рабочий адрес" Required="false" RequiredError="@ERROR_REQUIRED" T="string"></MudTextField>
                         </MudItem>
-
                     </MudStack>
                 </MudItem>
                 <MudItem xs="12">
@@ -85,7 +84,7 @@
     private MudDialog MudDialog;
     private MudForm MudForm;
 
-    private void Submit() => MudDialogInstance.Close(DialogResult.Ok(PatientId));
+    private void Submit() => MudDialogInstance.Close(DialogResult.Ok(patient));
 
     private void Cancel() => MudDialogInstance.Cancel();
 

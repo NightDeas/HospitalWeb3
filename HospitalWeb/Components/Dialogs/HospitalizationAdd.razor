@@ -48,10 +48,7 @@
         await LoadPatients();
     }
 
-    // private void PatientValueChanged( e)
-    // {
-        
-    // }
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -82,6 +79,8 @@
         if (!resultDialog.Canceled)
         {
             await LoadPatients();
+            Patient = Patients.First(x => x.Id == (int)resultDialog.Data);
+
         }
     }
 }
