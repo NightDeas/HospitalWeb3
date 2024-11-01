@@ -1,0 +1,81 @@
+﻿@page "/HospitalizationAdd"
+@rendermode InteractiveServer
+@inject IDialogService DialogService;
+@inject ISnackbar SnackBar;
+@inject Services.Api.PatientApiService PatientApi;
+<MudDialog Style="width: 600px">
+    <TitleContent>
+        <MudText Color="Color.Primary" Typo="Typo.h3">@TitleContentText</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="_mudForm" @bind-IsValid="formValid">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudText Color="Color.Secondary" Typo="Typo.h5">Пациент</MudText>
+                    <MudStack Spacing="6" Row="true">
+                        <MudText>Выбрать пациента</MudText>
+                        <MudSelect T="int" @bind-Value="PatientId">
+                            @foreach (var item in Patients)
+                            {
+                                <MudSelectItem @bind-Value="item.Id">@item.FullName</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudStack>
+                    <MudStack Spacing="6" Row="true" Wrap="Wrap.NoWrap">
+                        <MudText>Регистрация нового пациента:</MudText>
+                        <MudButton Color="Color.Secondary" OnClick="CreatePatientClick">Добавить пациента</MudButton>
+                    </MudStack>
+                    <MudText></MudText>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance DialogInstance { get; set; }
+    string TitleContentText { get; set; } = "Госпитализация пациента";
+    MudForm _mudForm;
+    bool formValid;
+    int PatientId
+    {
+        get;
+        set;
+    }
+    List<Domain.DTOModels.Patient.PatientDTOResponseTableData> Patients { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPatients();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await OnInitializedAsync();
+    }
+
+    private async Task LoadPatients()
+    {
+        Patients = await PatientApi.GetTableDatasAsync();
+        await InvokeAsync(() => StateHasChanged());
+    }
+
+    public void CreatePatientClick() => Task.Run(CreatePatient);
+
+    private async Task CreatePatient()
+    {
+        DialogParameters<Dialogs.PatientAdd> parametrs = new()
+        {
+            {x => x.PatientId, 0},
+        };
+        MudBlazor.DialogOptions options = new()
+            {
+                CloseOnEscapeKey = true,
+            };
+        var patientId = await DialogService.ShowAsync<PatientAdd>("test", parametrs, options);
+        await LoadPatients();
+        SnackBar.Add("Пациент добавлен в базу данных", Severity.Success);
+    } 
+}

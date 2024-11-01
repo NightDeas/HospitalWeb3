@@ -1,7 +1,9 @@
 ﻿@page "/Hospitalization"
 @inject Services.Api.HospitalizationApiService HospitalizationApi;
+@inject IDialogService DialogService;
 @inject ISnackbar SnackBar;
 @using Keys = Services.CookiesService.Keys;
+@using System.Diagnostics
 @inject Services.CookiesService CookieService;
 <MudGrid Spacing="6">
     <MudItem xs="12">
@@ -21,7 +23,6 @@
         <MudPaper Class="pa-4" Height="75vh">
             <MudDataGrid Items="@_dataTable">
                 <ToolBarContent>
-                    <MudText Typo="Typo.h6">Periodic Elements</MudText>
                     <MudSpacer />
                     <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
                                   AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -48,9 +49,14 @@
             </MudDataGrid>
         </MudPaper>
     </MudItem>
+    <MudItem xs="12" Style="height: 15vh">
+        <MudGrid Justify="Justify.Center">
+            <MudButton Style="font-size:22px" OnClick="() => OpenDialogHospitalization()" Color="Color.Primary">Добавить</MudButton>
+        </MudGrid>
+    </MudItem>
 </MudGrid>
 @code {
-    string _searchString;
+    string _searchString { get; set; }
     List<Domain.DTOModels.Hospitalization.HospitalizationDTOResponseTable> _dataTable = new();
 
     Dictionary<Services.CookiesService.Keys, bool> _columnVisible = new()
@@ -74,6 +80,16 @@
     {
         Task.Run(AutoUpdateData);
         _columnVisible = await CookieService.LoadCookieVisibleColumn(_columnVisible);
+    }
+
+    private Task OpenDialogHospitalization()
+    {
+        var parametrs = new DialogParameters<Dialogs.HospitalizationAdd>();
+        var options = new MudBlazor.DialogOptions()
+            {
+                CloseOnEscapeKey = true,
+            };
+            return DialogService.ShowAsync<Dialogs.HospitalizationAdd>("test", parametrs, options);
     }
 
     private async Task AutoUpdateData()

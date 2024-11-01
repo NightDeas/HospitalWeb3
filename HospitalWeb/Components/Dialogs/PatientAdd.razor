@@ -85,7 +85,7 @@
     private MudDialog MudDialog;
     private MudForm MudForm;
 
-    private void Submit() => MudDialogInstance.Close(DialogResult.Ok(true));
+    private void Submit() => MudDialogInstance.Close(DialogResult.Ok(PatientId));
 
     private void Cancel() => MudDialogInstance.Cancel();
 
@@ -173,7 +173,7 @@
         string name = "df";
     }
 
-    async void CloseDialog() => await MudDialog.CloseAsync();
+    async void CloseDialog() => await MudDialog.CloseAsync(DialogResult.Ok(PatientId));
 
     private async Task ButtonAdd_Click()
     {
@@ -210,7 +210,9 @@
         int tempId = await PatientApiService.Add(patientDTORequest);
         if (tempId == 0)
             throw new();
+        PatientId = tempId;
         SbService.Add("Пациент добавлен в базу", Severity.Success);
+        Submit();
 
 
     }
