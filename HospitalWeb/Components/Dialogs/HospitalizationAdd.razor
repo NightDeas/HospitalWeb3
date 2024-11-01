@@ -14,10 +14,10 @@
                     <MudText Color="Color.Secondary" Typo="Typo.h5">Пациент</MudText>
                     <MudStack Spacing="6" Row="true">
                         <MudText>Выбрать пациента</MudText>
-                        <MudSelect T="int" @bind-Value="PatientId">
+                        <MudSelect T="Domain.DTOModels.Patient.PatientDTOResponseTableData" @bind-Value="Patient">
                             @foreach (var item in Patients)
                             {
-                                <MudSelectItem @bind-Value="item.Id">@item.FullName</MudSelectItem>
+                                <MudSelectItem T="Domain.DTOModels.Patient.PatientDTOResponseTableData">@item.FullName</MudSelectItem>
                             }
                         </MudSelect>
                     </MudStack>
@@ -38,17 +38,20 @@
     string TitleContentText { get; set; } = "Госпитализация пациента";
     MudForm _mudForm;
     bool formValid;
-    int PatientId
-    {
-        get;
-        set;
-    }
-    List<Domain.DTOModels.Patient.PatientDTOResponseTableData> Patients { get; set; } = new();
+    Domain.DTOModels.Patient.PatientDTOResponseTableData Patient{ get;
+        set; }
+    List<Domain.DTOModels.Patient.PatientDTOResponseTableData> Patients { get;
+        set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
         await LoadPatients();
     }
+
+    // private void PatientValueChanged( e)
+    // {
+        
+    // }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -74,8 +77,11 @@
             {
                 CloseOnEscapeKey = true,
             };
-        var patientId = await DialogService.ShowAsync<PatientAdd>("test", parametrs, options);
-        await LoadPatients();
-        SnackBar.Add("Пациент добавлен в базу данных", Severity.Success);
-    } 
+        var dialog = await DialogService.ShowAsync<PatientAdd>("test", parametrs, options);
+        var resultDialog = await dialog.Result;
+        if (!resultDialog.Canceled)
+        {
+            await LoadPatients();
+        }
+    }
 }
