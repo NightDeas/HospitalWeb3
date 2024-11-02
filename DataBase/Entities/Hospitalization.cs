@@ -17,7 +17,7 @@ namespace DataBase.Entities
         public string Code { get; set; }
         public bool IsRejection { get; set; }
         public bool IsCancel { get; set; }
-        public string ReasonRejection { get; set; }
+        public string? ReasonRejection { get; set; }
         public DateTime Date { get; set; }
         public DateTime Create { get; set; }
 

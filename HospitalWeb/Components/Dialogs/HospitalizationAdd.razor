@@ -3,84 +3,144 @@
 @inject IDialogService DialogService;
 @inject ISnackbar SnackBar;
 @inject Services.Api.PatientApiService PatientApi;
+@inject Services.Api.HospitalizationApiService HospitalizationApi;
 <MudDialog Style="width: 600px">
-    <TitleContent>
-        <MudText Color="Color.Primary" Typo="Typo.h3">@TitleContentText</MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudForm @ref="_mudForm" @bind-IsValid="formValid">
-            <MudGrid>
-                <MudItem xs="12">
-                    <MudText Color="Color.Secondary" Typo="Typo.h5">Пациент</MudText>
-                    <MudStack Spacing="6" Row="true">
-                        <MudText>Выбрать пациента</MudText>
-                        <MudSelect T="Domain.DTOModels.Patient.PatientDTOResponseTableData" @bind-Value="Patient">
-                            @foreach (var item in Patients)
-                            {
-                                <MudSelectItem T="Domain.DTOModels.Patient.PatientDTOResponseTableData">@item.FullName</MudSelectItem>
-                            }
-                        </MudSelect>
-                    </MudStack>
-                    <MudStack Spacing="6" Row="true" Wrap="Wrap.NoWrap">
-                        <MudText>Регистрация нового пациента:</MudText>
-                        <MudButton Color="Color.Secondary" OnClick="CreatePatientClick">Добавить пациента</MudButton>
-                    </MudStack>
-                    <MudText></MudText>
-                </MudItem>
-            </MudGrid>
-        </MudForm>
-    </DialogContent>
+	<TitleContent>
+		<MudText Color="Color.Primary" Typo="Typo.h3">@TitleContentText</MudText>
+	</TitleContent>
+	<DialogContent>
+		<MudForm @ref="_mudForm" @bind-IsValid="formValid">
+			<MudGrid>
+				<MudItem xs="12">
+					<MudTextField @bind-Value="Code" Required="true" Label="Код госпитализации"></MudTextField>
+				</MudItem>
+				<MudItem xs="12">
+					<MudText Color="Color.Secondary" Typo="Typo.h5">Пациент</MudText>
+					<MudStack Spacing="6" Row="true">
+						<MudText>Выбрать пациента</MudText>
+						<MudSelect Required="true" T="Domain.DTOModels.Patient.PatientDTOResponseTableData" @bind-Value="Patient">
+							@foreach (var item in Patients)
+							{
+								<MudSelectItem Value="item" T="Domain.DTOModels.Patient.PatientDTOResponseTableData">@item.FullName</MudSelectItem>
+							}
+						</MudSelect>
+					</MudStack>
+					<MudStack Spacing="6" Row="true" Wrap="Wrap.NoWrap">
+						<MudText>Регистрация нового пациента:</MudText>
+						<MudButton Color="Color.Secondary" OnClick="CreatePatientClick">Добавить пациента</MudButton>
+					</MudStack>
+					<MudText></MudText>
+				</MudItem>
+				<MudItem xs="12">
+					<MudText Color="Color.Secondary" Typo="Typo.h5">Отказ от госпитализации</MudText>
+					<MudSelect T="string" Label="По инициативе">
+						<MudSelectItem OnClick="() => {IsCancel = true; IsRejection = false;}" T="string">Пациента</MudSelectItem>
+						<MudSelectItem OnClick="() => {IsCancel = false; IsRejection = true;}" T="string">Врача</MudSelectItem>
+					</MudSelect>
+					<MudText Color="Color.Secondary">Причина</MudText>
+					<MudTextField Variant="MudBlazor.Variant.Outlined" Lines="5" @bind-Value="Reason"></MudTextField>
+				</MudItem>
+			</MudGrid>
+		</MudForm>
+	</DialogContent>
+	<DialogActions>
+		<MudButton Color="Color.Primary" OnClick="ButtonAdd_Click">Добавить</MudButton>
+		<MudButton Color="Color.Error" OnClick="Cancel">Отмена</MudButton>
+	</DialogActions>
 </MudDialog>
 
 @code {
-    [CascadingParameter]
-    MudDialogInstance DialogInstance { get; set; }
-    string TitleContentText { get; set; } = "Госпитализация пациента";
-    MudForm _mudForm;
-    bool formValid;
-    Domain.DTOModels.Patient.PatientDTOResponseTableData Patient{ get;
-        set; }
-    List<Domain.DTOModels.Patient.PatientDTOResponseTableData> Patients { get;
-        set; } = new();
+	[CascadingParameter]
+	MudDialogInstance DialogInstance { get; set; }
+	string TitleContentText { get; set; } = "Госпитализация пациента";
+	MudForm _mudForm;
+	bool formValid;
+	Domain.DTOModels.Patient.PatientDTOResponseTableData Patient
+	{
+		get;
+		set;
+	}
+	List<Domain.DTOModels.Patient.PatientDTOResponseTableData> Patients
+	{
+		get;
+		set;
+	} = new();
+	string Code;
+	bool isCancel;
+	bool IsCancel
+	{
+		get { return isCancel; }
+		set
+		{
+			isCancel = value;
+		}
+	}
+	bool isRejection;
+	bool IsRejection
+	{
+		get { return isRejection; }
+		set
+		{
+			isRejection = value;
+		}
+	}
+	string Reason { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadPatients();
-    }
+	private void Cancel() => DialogInstance.Cancel();
+	private async Task ButtonAdd_Click()
+	{
+		_mudForm.Validate();
+		if (!formValid)
+			return;
+		Domain.DTOModels.Hospitalization.HospitalizationDTORequest hospitalizationDTORequest = new();
+		hospitalizationDTORequest.IsRejection = IsRejection;
+		hospitalizationDTORequest.IsCancel = IsCancel;
+		hospitalizationDTORequest.ReasonRejection = Reason;
+		hospitalizationDTORequest.Code = Code;
+		hospitalizationDTORequest.PatientId = Patient.Id;
+		hospitalizationDTORequest.Date = DateTime.Now;
+		await HospitalizationApi.Add(hospitalizationDTORequest);
+		SnackBar.Add("Информация о госпитализации добавлена", Severity.Success);
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadPatients();
+	}
 
 
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-            await OnInitializedAsync();
-    }
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+			await OnInitializedAsync();
+	}
 
-    private async Task LoadPatients()
-    {
-        Patients = await PatientApi.GetTableDatasAsync();
-        await InvokeAsync(() => StateHasChanged());
-    }
+	private async Task LoadPatients()
+	{
+		Patients = await PatientApi.GetTableDatasAsync();
+		await InvokeAsync(() => StateHasChanged());
+	}
 
-    public void CreatePatientClick() => Task.Run(CreatePatient);
+	public void CreatePatientClick() => Task.Run(CreatePatient);
 
-    private async Task CreatePatient()
-    {
-        DialogParameters<Dialogs.PatientAdd> parametrs = new()
-        {
-            {x => x.PatientId, 0},
-        };
-        MudBlazor.DialogOptions options = new()
-            {
-                CloseOnEscapeKey = true,
-            };
-        var dialog = await DialogService.ShowAsync<PatientAdd>("test", parametrs, options);
-        var resultDialog = await dialog.Result;
-        if (!resultDialog.Canceled)
-        {
-            await LoadPatients();
-            Patient = Patients.First(x => x.Id == (int)resultDialog.Data);
+	private async Task CreatePatient()
+	{
+		DialogParameters<Dialogs.PatientAdd> parametrs = new()
+		{
+			{x => x.PatientId, 0},
+		};
+		MudBlazor.DialogOptions options = new()
+			{
+				CloseOnEscapeKey = true,
+			};
+		var dialog = await DialogService.ShowAsync<PatientAdd>("test", parametrs, options);
+		var resultDialog = await dialog.Result;
+		if (!resultDialog.Canceled)
+		{
+			await LoadPatients();
+			Patient = Patients.First(x => x.Id == (int)resultDialog.Data);
 
-        }
-    }
+		}
+	}
 }
